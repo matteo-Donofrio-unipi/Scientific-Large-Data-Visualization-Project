@@ -1,0 +1,27 @@
+<!doctype html>
+<title>{% block title %}{% endblock %} - Raccogli e Stampa dati</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+<nav>
+    <h1>Progetto raccolta dati</h1>
+    <ul>
+        <li><a href="{{ url_for('get_data.get_strings') }}">Raccolta dati</a>
+      </ul>
+    <ul>
+      <li><a href="{{ url_for('show_data.show', s='stringa base') }}">Mostra dati</a>
+    </ul>
+    <ul>
+        <li><a href="{{ url_for('get_data.plot') }}">Plot</a>
+      </ul>
+</nav>
+
+
+<section class="content">
+  <header>
+    {% block header %}{% endblock %}
+  </header>
+  {% for message in get_flashed_messages() %}
+    <div class="flash">{{ message }}</div>
+  {% endfor %}
+  {% block content %}<h1>{{string_data}}</h1>  {% endblock %}
+</section>

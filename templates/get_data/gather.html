@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+<nav>
+    <h1>Progetto raccolta dati</h1>
+    <ul>
+      <li><a href="{{ url_for('show_data.show', s='stringa base') }}">Mostra dati</a>
+    </ul>
+</nav>
+
+
+{% block header %}
+  <h1>{% block title %}Qui raccogliamo i tuoi dati{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+  <form method="post">
+    <label for="string">Stringa da raccogliere</label>
+    <input name="string" id="string" value="{{ request.form['string'] }}" required>
+
+    <input type="submit" value="Save">
+  </form>
+{% endblock %}
