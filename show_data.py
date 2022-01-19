@@ -26,12 +26,15 @@ def show(s):
 
 @bp.route('/plot')
 def plot():
-    plot_img = create_figure()
-    printable = makeimagedata(plot_img)
-    return render_template('show_data/print_plot.html', imgdata = printable)
+    set={}
+    plot_img1 = create_figure()
+    plot_img2 = create_figure()
+    printable = makeimagedata(plot_img1)
+    printable2 = makeimagedata(plot_img2)
+    return render_template('show_data/print_plot.html', set={'imgdata' : printable, 'imgdata2':printable2 })
     #return Response(output.getvalue(), mimetype='image/png')
 
-#trasforma l'immagine generata da create figure in uno stream di byte 
+#trasforma l'immagine generata da create_figure in uno stream di byte 
 def makeimagedata(plot_img):
     img = io.BytesIO()
     plot_img.savefig(img, format ='PNG')
