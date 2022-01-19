@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+<nav>
+    <h1>Progetto raccolta dati</h1>
+</nav>
+
+
+{% block header %}
+  <h1>{% block title %}Qui mostriamo i tuoi dati{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+<h1>Plot facile</h1>
+<img src="data:image/png;base64,{{imgdata}}"/>
+{% endblock %}
