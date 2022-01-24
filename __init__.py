@@ -5,7 +5,7 @@ from flask import Flask
 from flask import (
     Blueprint, flash, redirect, render_template, url_for, request
 )
-main_string = "empty for now"
+
 
 def create_app(test_config=None):
     # create and configure the app
@@ -14,7 +14,7 @@ def create_app(test_config=None):
     # a simple page that says hello
     @app.route('/')
     def index():
-        return render_template('base.html', string_data=main_string) #POTREI PASSARE PARAMETRI
+        return render_template('Home.html') #POTREI PASSARE PARAMETRI
 
     from . import get_data
     app.register_blueprint(get_data.bp)

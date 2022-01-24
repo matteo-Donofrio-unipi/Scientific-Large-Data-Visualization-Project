@@ -28,9 +28,32 @@ import plotly.io as pio
 bp = Blueprint('show_data', __name__, url_prefix='/show_data')
 
 
-@bp.route('/<string:s>/show', methods=('GET', 'POST'))
-def show(s):
-    return render_template('show_data/print.html', string_data=s)
+@bp.route('/<string:country>/standard_topic_selection')
+def standard_topic_selection(country):
+    return render_template('show_data/standard_topic_selection.html', country=country)
+
+@bp.route('/<string:country>/<string:topic>/standard_year_selection')
+def standard_year_selection(country, topic):
+    return render_template('show_data/standard_year_selection.html', country=country, topic=topic)
+
+@bp.route('/<string:country>/topic3')
+def topic3(country):
+    return render_template('show_data/topic3.html', country=country)
+
+
+@bp.route('/<string:country>/<string:topic>/<string:year>/topic2')
+def topic2(country, topic, year):
+    return render_template('show_data/topic2.html', country=country, topic=topic, year=year)
+
+@bp.route('/<string:country>/<string:topic>/<string:year>/topic1')
+def topic1(country, topic, year):
+    return render_template('show_data/topic1.html', country=country, topic=topic, year=year)
+
+@bp.route('/topic4')
+def topic4():
+    return render_template('show_data/topic4.html')
+
+
 
 
 #---------------MATPLOTLIB/SEABORN BASED GRAPH-------#
