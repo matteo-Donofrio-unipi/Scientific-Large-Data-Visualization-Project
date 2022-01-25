@@ -44,7 +44,37 @@ def topic3(country):
 
 @bp.route('/<string:country>/<string:topic>/<string:year>/topic1')
 def topic1(country, topic, year):
-    return render_template('show_data/topic1.html', country=country, topic=topic, year=year)
+    df = pd.read_csv('progetto/datasets/how_produce_energy/'+country+'_how_produce_energy.csv')
+    df1 = df[['SIEC',year]] #take only the 2 columns needed 
+
+    df1 = df1.rename(columns={year: "Amount", 'SIEC' : 'Source_of_Energy'}) #rename those columns
+
+    df1 = df1[df1.Source_of_Energy != 'Total'] #remove the row with the total amount
+    df1.reset_index(inplace = True, drop = True)
+
+    #define a static list about the type of the source energy (defined manually by looking at the source)
+    type_list=['non_renwable','renwable','non_renwable','non_renwable','renwable','non_renwable','non_renwable','renwable','renwable','renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','renwable','renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','renwable','non_renwable','non_renwable','non_renwable','renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','renwable','renwable','renwable','renwable','non_renwable','non_renwable','renwable','renwable','renwable','non_renwable','renwable','non_renwable','renwable']
+    df1['Type'] = type_list #add this new column
+
+    #transform the Amount column from strings to float, done using a temporary list
+    value_list = df1['Amount']
+    value_list = [w.replace(',', '') for w in value_list]
+    value_list2=[float(i) for i in value_list]
+
+    df1['Amount'] = value_list2 #assign the column of float
+    df1 = df1[df1.Amount > 0] #remove energy source having Amount=0
+
+    fig_funnel = px.funnel(df1, x='Amount', y='Source_of_Energy', color='Type')
+    fig_pie = px.pie(df1, values='Amount', names='Type', title='Energy use')
+
+    graphJSON_funnel = json.dumps(fig_funnel, cls=plotly.utils.PlotlyJSONEncoder)
+    graphJSON_pie = json.dumps(fig_pie, cls=plotly.utils.PlotlyJSONEncoder)
+
+
+    return render_template('show_data/topic1.html', country=country, topic=topic, year=year, graphJSON_funnel=graphJSON_funnel, graphJSON_pie=graphJSON_pie)
+
+
+
 
 @bp.route('/topic4')
 def topic4():
@@ -53,7 +83,7 @@ def topic4():
 @bp.route('/<string:country>/<string:topic>/<string:year>/topic2')
 def topic2(country, topic, year):
     df = pd.read_csv('progetto/datasets/how_energy_is_used/'+country+'_how_energy_is_used.csv')
-    df = df.drop(labels=0, axis=0) #remove first row (containing total energy used for each year)
+    df = df[df.Use != 'energy use'] #remove first row (containing total energy used for each year)
     df.reset_index(inplace = True, drop = True)
     df = df[['Use',year]] #take only the 2 columns needed 
     
@@ -77,11 +107,15 @@ def topic2(country, topic, year):
     df['Type']=type_list #add the new category column 
     df = df.rename(columns={year: "Amount"})
 
-    fig = px.treemap(df, path=['Type','Use'], values = 'Amount', width=800, height=800)
+    fig_tree = px.treemap(df, path=['Type','Use'], values = 'Amount', width=800, height=800)
 
-    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+    fig_pie = px.pie(df, values='Amount', names='Type', title='Energy use: aggregated data')
 
-    return render_template('show_data/topic2.html', country=country, topic=topic, year=year, graphJSON=graphJSON)
+
+    graphJSON_tree = json.dumps(fig_tree, cls=plotly.utils.PlotlyJSONEncoder)
+    graphJSON_pie = json.dumps(fig_pie, cls=plotly.utils.PlotlyJSONEncoder)
+
+    return render_template('show_data/topic2.html', country=country, topic=topic, year=year, graphJSON_tree=graphJSON_tree, graphJSON_pie=graphJSON_pie)
 
 
 
