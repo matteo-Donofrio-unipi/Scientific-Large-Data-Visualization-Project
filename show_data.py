@@ -21,6 +21,7 @@ import plotly
 import plotly.express as px
 from plotly.subplots import make_subplots
 import plotly.io as pio
+import numpy as np
 
 #creo un blueprint chiamato auth
 #definisco url suo, che verrà preposto ad ogni view 
@@ -38,8 +39,60 @@ def standard_year_selection(country, topic):
 
 @bp.route('/<string:country>/topic3')
 def topic3(country):
-    return render_template('show_data/topic3.html', country=country)
+    df = pd.read_csv('progetto/datasets/how_produce_energy/'+country+'_how_produce_energy.csv')
 
+    df = df.rename(columns={'SIEC' : 'Source_of_Energy'})#rename the column 
+    df = df[df.Source_of_Energy != 'Total'] #remove the total row, not used
+
+    #define if a source of energy is or not renwable (defined manually, so it's static)
+    type_list=['non_renwable','renwable','non_renwable','non_renwable','renwable','non_renwable','non_renwable','renwable','renwable','renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','renwable','renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','renwable','non_renwable','non_renwable','non_renwable','renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','renwable','renwable','renwable','renwable','non_renwable','non_renwable','renwable','renwable','renwable','non_renwable','renwable','non_renwable','renwable']
+    df['Type'] = type_list
+
+    df=df.replace(",","", regex=True) #remove comma from values in order to cast them to float (regex allow to substitute even substrings)
+
+    df_for_area=produce_table_for_topic3(df)
+
+    fig_area = px.area(df_for_area, x="year", y=['perc_r','perc_n'], color_discrete_sequence=px.colors.qualitative.Dark2 )
+    graphJSON_area = json.dumps(fig_area, cls=plotly.utils.PlotlyJSONEncoder)
+
+    return render_template('show_data/topic3.html', country=country, graphJSON_area=graphJSON_area)
+
+
+#define the new df used by topic3 (a df tracking for each year, the % of renwable and not renwable source of energy converted to electricity)
+def produce_table_for_topic3(df):
+    df2 = pd.DataFrame(columns=['year','tot','perc_r','perc_n'], index=np.arange(0,(len(df.columns)-2),1)) 
+    k=0 #iterator for df2
+    tot=0 #for each year, store the total energy produced
+    tot_r=0 #for each year, store the total energy produced from renwable sources
+    tot_n=0 #for each year, store the total energy produced from NON_renwable sources
+    
+    for i in range(len(df.columns)): #for each column in the df 
+        
+        if(i==0 or i==len(df.columns)-1): #skip the first & last col, since they're Source_of_energy and Type
+                pass
+        else:
+
+            df[df.columns[i]] = pd.to_numeric(df[df.columns[i]], downcast="float") #cast the year column values into float
+            tot = df[df.columns[i]].sum() #compute the total for the year
+            
+            for j in range(len(df)): #for each row of a year column, count total energy from renwable and non_renwable
+                if(df.iloc[j]['Type']=='renwable'): 
+                    tot_r+=df.iloc[j][df.columns[i]]
+                else:
+                    tot_n+=df.iloc[j][df.columns[i]]
+            
+            #assign the computed values to the k-th row of the new df2
+            df2.iloc[k]['tot']=tot
+            df2.iloc[k]['year']=df.columns[i]
+            df2.iloc[k]['perc_r']=tot_r/tot
+            df2.iloc[k]['perc_n']=tot_n/tot
+            #update variables and iterators
+            k=k+1
+            tot=0
+            tot_r=0
+            tot_n=0
+    
+    return df2
 #rimuovere passaggio di var topic in topic1 e 2
 
 @bp.route('/<string:country>/<string:topic>/<string:year>/topic1')
