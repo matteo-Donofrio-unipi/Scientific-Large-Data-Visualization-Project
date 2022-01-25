@@ -6,6 +6,20 @@
 </div>
 
 
+  <!-- Services -->
+  <div class="w3-container" id="services" style="margin-top:75px">
+    {% block content %}
+  <div id="plotly-funnel"  class="chart"></div>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
+  <script>
+  var graph_tree = {{ graphJSON_area | safe }};
+  Plotly.plot('plotly-funnel', graph_tree, {});
+  </script>
+
+
+{% endblock %}
+  </div>
 
 {% extends 'base.html' %}
 </body>
