@@ -22,6 +22,7 @@ import plotly.express as px
 from plotly.subplots import make_subplots
 import plotly.io as pio
 import numpy as np
+import json
 
 #creo un blueprint chiamato auth
 #definisco url suo, che verrà preposto ad ogni view 
@@ -130,11 +131,99 @@ def topic1(country, topic, year):
     return render_template('show_data/topic1.html', country=country, topic=topic, year=year, graphJSON_funnel=graphJSON_funnel, graphJSON_pie=graphJSON_pie)
 
 
+def produce_table_for_topic4(df_countries,year):
+    #here we build a df st: for each country we def the % of renwable source of energy used 
+    
+    #here we build a list of names that will be taken from the json file, a list of country of interest, since the json contains name 
+    #of all countries of the world
+
+    name_list_json = ['Albania', 'Austria', 'Belgium', 'Bosnia and Herzegovina', 'Bulgaria', 'Croatia', 'Cyprus', 'Czech Republic', 'Denmark', 'Estonia',
+            'Finland', 'France', 'Georgia', 'Germany', 'Greece', 'Hungary', 'Iceland', 'Ireland', 'Italy', 'Latvia', 'Lithuania', 'Luxembourg',
+            'Malta', 'Montenegro', 'Netherlands', 'Montenegro', 'The former Yugoslav Republic of Macedonia', 'Norway', 'Poland', 'Portugal',
+            'Romania', 'Serbia', 'Slovakia', 'Slovenia', 'Spain', 'Sweden', 'Turkey', 'Ukraine', 'United Kingdom']
+
+    #list of countries of interest, written in the same way of csv datasets, in order to scan the list and access datasets
+
+    name_list_csv = ['Albania', 'Austria', 'Belgium', 'Bosnia_and_Herzegovina', 'Bulgaria', 'Croatia', 'Cyprus', 'Czech_Rep', 'Denmark', 'Estonia',
+            'Finland', 'France', 'Georgia', 'Germany', 'Greece', 'Hungary', 'Iceland', 'Ireland', 'Italy', 'Latvia', 'Lithuania', 'Luxembourg',
+            'Malta', 'Montenegro', 'Netherlands', 'Montenegro', 'Macedonia', 'Norway', 'Poland', 'Portugal',
+            'Romania', 'Serbia', 'Slovakia', 'Slovenia', 'Spain', 'Sweden', 'Turkey', 'Ukraine', 'United_Kingdom']
+
+    #list defined manually to track which source of energy is renwable or isn't
+    type_list=['non_renwable','renwable','non_renwable','non_renwable','renwable','non_renwable','non_renwable','renwable','renwable','renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','renwable','renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','renwable','non_renwable','non_renwable','non_renwable','renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','renwable','renwable','renwable','renwable','non_renwable','non_renwable','renwable','renwable','renwable','non_renwable','renwable','non_renwable','renwable']
+
+    #this list will contain the % for each country
+    value_list=[]
+
+    #initialize the column of countrie's names (use as country name the same name of the json file)
+    df_countries['Name']=name_list_json
+
+    for i in (name_list_csv): #for each country
+        df = pd.read_csv('progetto/datasets/how_produce_energy/'+i+'_how_produce_energy.csv')
+        df = df[['SIEC',year]] #choose only the year of interest
+        df=df.replace(",","", regex=True) #prepare data to be cast from string to float
+        
+        df[year] = pd.to_numeric(df[year], downcast="float")#cast
+        df = df[df.SIEC != 'Total'] #remove total col, since not significative
+        df['Type'] = type_list #add type col
+        
+        tot=0
+        tot_r=0
+        perc_r =0
+        
+        
+        tot = df[year].sum() #take the sum of energy produced in a year
+        if(tot > 0):
+            for j in range(len(df)):
+                if(df.iloc[j]['Type']=='renwable'):
+                    tot_r+=df.iloc[j][year] #take the sum of renwable energy produced in a year
+        
+            perc_r = tot_r / tot #compute %
+        else:
+            perc_r = -1
+        value_list.append(perc_r) #add percentage to list
+    
+    df_countries['Renwable_percentage']=value_list #add list to df (now the list has as many % as many countries)
+
+    return df_countries
 
 
-@bp.route('/topic4')
-def topic4():
-    return render_template('show_data/topic4.html')
+
+@bp.route('/<string:country>/<string:topic>/<string:year>/topic4')
+def topic4(country, topic, year):
+
+    df_countries = pd.DataFrame(columns=['Name','Renwable_percentage'])
+
+    df_for_choropleth= produce_table_for_topic4(df_countries,year)
+
+    #here is used a json file defining the european structure, used for build the map,
+    #each country in the json file is associated with a set of metadata,
+    #metadata of a country i is given by "data['features'][i].keys()",
+    #initially, for each country, metadata is only-> ['type', 'properties', 'geometry'],
+    #then we add manually another one called 'Name' containing the name of the country, it will be used by the choropleth to find the country
+    
+    file_json = open('progetto/countries.json', 'r')
+
+    data_json = json.load(file_json)
+    for features in data_json['features']:
+        features['Name'] = features['properties']['NAME']
+
+    #now for each country, metadata is-> ['type', 'properties', 'geometry', 'Name']
+
+    #locations & color, refer to the attribute in the dataframe from which take values
+    #featureidkey="Name" is used to match the name of the country in the dataframe with the name of the country in the json(they've same attribute name)
+    fig_choropleth = px.choropleth(df_countries, geojson=data_json, locations='Name', color='Renwable_percentage',
+                           color_continuous_scale="Viridis",
+                           range_color=(0, 1),
+                           scope="europe",
+                           labels={'unemp':'unemployment rate'},
+                           featureidkey="Name"
+                          )
+    fig_choropleth.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+
+    graphJSON_choropleth = json.dumps(fig_choropleth, cls=plotly.utils.PlotlyJSONEncoder)
+
+    return render_template('show_data/topic4.html', year=year, graphJSON_choropleth=graphJSON_choropleth )
 
 @bp.route('/<string:country>/<string:topic>/<string:year>/topic2')
 def topic2(country, topic, year):
