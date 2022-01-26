@@ -1,12 +1,25 @@
 <!-- Services -->
 
 <div class="w3-container" id="services" style="margin-top:75px">
-    <h1 class="w3-xxxlarge w3-text-red"><b>Overall European Renwable vs non-renwable</b></h1>
+    <h1 class="w3-xxxlarge w3-text-red"><b>Overall European Renwable vs non-renwable for the year {{ year }}</b></h1>
     <hr style="width:50px;border:5px solid red" class="w3-round">
 </div>
 
 
-<h1> ABOUT</h1>
+  <!-- Services -->
+  <div class="w3-container" id="services" style="margin-top:75px">
+    {% block content %}
+  <div id="plotly-funnel"  class="chart"></div>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
+  <script>
+  var graph_tree = {{ graphJSON_choropleth | safe }};
+  Plotly.plot('plotly-funnel', graph_tree, {});
+  </script>
+
+
+{% endblock %}
+  </div>
 
 {% extends 'base.html' %}
 </body>
