@@ -52,7 +52,8 @@ def topic3(country):
 
     df_for_area=produce_table_for_topic3(df)
 
-    fig_area = px.area(df_for_area, x="year", y=['perc_r','perc_n'], color_discrete_sequence=px.colors.qualitative.Dark2 )
+    fig_area = px.area(df_for_area, x="year", y=['perc_r','perc_n'], color_discrete_sequence=px.colors.qualitative.Dark2, color_discrete_map={ # replaces default color mapping by value
+                "perc_n": 'Orange', 'perc_r':'green'}  )
     graphJSON_area = json.dumps(fig_area, cls=plotly.utils.PlotlyJSONEncoder)
 
     return render_template('show_data/topic3.html', country=country, graphJSON_area=graphJSON_area)
@@ -109,16 +110,18 @@ def topic1(country, topic, year):
     type_list=['non_renwable','renwable','non_renwable','non_renwable','renwable','non_renwable','non_renwable','renwable','renwable','renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','renwable','renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','renwable','non_renwable','non_renwable','non_renwable','renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','non_renwable','renwable','renwable','renwable','renwable','non_renwable','non_renwable','renwable','renwable','renwable','non_renwable','renwable','non_renwable','renwable']
     df1['Type'] = type_list #add this new column
 
-    #transform the Amount column from strings to float, done using a temporary list
-    value_list = df1['Amount']
-    value_list = [w.replace(',', '') for w in value_list]
-    value_list2=[float(i) for i in value_list]
+    #transform the Amount column from strings to float (if needed), done using a temporary list
+    if(isinstance(df1.iloc[0]['Amount'], str)):
+        value_list = df1['Amount']
+        value_list = [w.replace(',', '') for w in value_list]
+        value_list2=[float(i) for i in value_list]
+        df1['Amount'] = value_list2 #assign the column of float
 
-    df1['Amount'] = value_list2 #assign the column of float
     df1 = df1[df1.Amount > 0] #remove energy source having Amount=0
 
-    fig_funnel = px.funnel(df1, x='Amount', y='Source_of_Energy', color='Type')
-    fig_pie = px.pie(df1, values='Amount', names='Type', title='Energy use')
+    fig_funnel = px.funnel(df1, x='Amount', y='Source_of_Energy', color='Type', color_discrete_sequence=px.colors.qualitative.Dark2, color_discrete_map={ # replaces default color mapping by value
+                "renwable": 'Green', "non_renwable": 'Orange'})
+    fig_pie = px.pie(df1, values='Amount', names='Type', color = 'Type', title='Energy use', color_discrete_sequence=px.colors.qualitative.Dark2, color_discrete_map={'renwable':'green','non_renwable':'orange'})
 
     graphJSON_funnel = json.dumps(fig_funnel, cls=plotly.utils.PlotlyJSONEncoder)
     graphJSON_pie = json.dumps(fig_pie, cls=plotly.utils.PlotlyJSONEncoder)
@@ -148,8 +151,8 @@ def topic2(country, topic, year):
             type_list.append('Transport')
         if (df.iloc[i]['Use'].startswith('other')):
             type_list.append('Other')
-
-        df.iloc[i][year]=df.iloc[i][year].replace(",","") #replace the comma in values in order to convert them to float
+        if(isinstance(df.iloc[i][year],str)):
+            df.iloc[i][year]=df.iloc[i][year].replace(",","") #replace the comma in values in order to convert them to float
 
         split_string = df.iloc[i]['Use'].split("-", 3) #take only the core of "Use" description
         if(split_string[1]==' non'):
@@ -160,42 +163,17 @@ def topic2(country, topic, year):
     df['Type']=type_list #add the new category column 
     df = df.rename(columns={year: "Amount"})
 
-    fig_tree = px.treemap(df, path=['Type','Use'], values = 'Amount', width=800, height=800)
+    fig_tree = px.treemap(df, path=['Type','Use'], values = 'Amount', color='Type', color_discrete_sequence=px.colors.qualitative.Dark2, color_discrete_map={ # replaces default color mapping by value
+                "Industry": 'Orange', "Other": '#2E91E5', 'Transport':'green'})
 
-    fig_pie = px.pie(df, values='Amount', names='Type', title='Energy use: aggregated data')
+    fig_pie = px.pie(df, values='Amount', names='Type', title='Energy use: aggregated data', color='Type', color_discrete_sequence=px.colors.qualitative.Dark2, color_discrete_map={ # replaces default color mapping by value
+                "Industry": 'Orange', "Other": '#2E91E5', 'Transport':'green'} )
 
 
     graphJSON_tree = json.dumps(fig_tree, cls=plotly.utils.PlotlyJSONEncoder)
     graphJSON_pie = json.dumps(fig_pie, cls=plotly.utils.PlotlyJSONEncoder)
 
     return render_template('show_data/topic2.html', country=country, topic=topic, year=year, graphJSON_tree=graphJSON_tree, graphJSON_pie=graphJSON_pie)
-
-
-
-
-def create_figure_plotly2():
-    df = pd.DataFrame({
-        "Fruit": ["Apples", "Oranges", "Bananas", "Apples", "Oranges", "Bananas"],
-        "Amount": [4, 1, 2, 2, 4, 5],
-        "City": ["SF", "SF", "SF", "Montreal", "Montreal", "Montreal"]
-    })
-
-    df2 = pd.DataFrame({
-        "Fruit": ["kiwi", "lime", "Bananas", "kiwi", "lime", "Bananas"],
-        "Amount": [4, 1, 2, 2, 4, 5],
-        "City": ["SF", "SF", "SF", "Montreal", "Montreal", "Montreal"]
-    })
-
-    fig = make_subplots(rows=2, cols=1, shared_xaxes=False)
-    fig1 = px.bar(df, x="Fruit", y="Amount", color="City", barmode="group")
-    fig2 = px.bar(df2, x="Fruit", y="Amount", color="City", barmode="group")
-    fig1.update_xaxes(rangeslider_visible=True)
-    fig2.update_xaxes(rangeslider_visible=True)
-    
-    fig.add_trace(fig1['data'][0], row=1, col=1)
-    fig.add_trace(fig2['data'][0], row=2, col=1)
-
-    return fig
 
 
 
