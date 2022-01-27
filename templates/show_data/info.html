@@ -45,28 +45,36 @@
 
       <!-- BASE COMUNE PAGINE/ PARTE 1 FINE -->
 
+      <!-- INIZIO Page Content VARIABILE -->
 
-<!-- INIZIO Page Content VARIABILE -->
-<div class="w3-padding-large" id="main">
-  <!-- Header/Home -->
-    <h1 class="w3-jumbo w3-text-red">  Topic selection</h1>
-    <hr style="width:10vw;border:0.5vw  solid red" class="w3-round">
+      <div class="w3-padding-large" id="main">
+        <!-- Header/Home -->
+          <h1 class="w3-jumbo w3-text-red">  Some informations about the Dashboard</h1>
+          <hr style="width:10vw;border:0.5vw  solid red" class="w3-round">
+          <ul>
+            <li>
+              <h5>
+                The information reported about how electric energy is produced consider only the one produced in each country,
+                don't consider the electric energy imported or exported for each country
+              </h5>
+            </li>
+            <li>
+              <h5>
+                The data was taken from <a href='https://ec.europa.eu/eurostat/web/main/data/database' class="w3-bar-item" style="width:25% !important">Eurostat</a>
+                (statistical office of the European Union) database. 
+              </h5>
+            </li>
+            <li>
+              <h5>
+                All the values shown (except for percentages) have as unity measure the KTOE (Thousand tonnes oil equivalent).
+                So 1 unit in the graphs represents the same energy obtained by converting A Thousand tonne of crude oil. 
+              </h5>
+            </li>
+          </ul>
 
-    
-    <div class="w3-row-padding">
-      <div class="w3-center w3-margin-bottom">
-        <ul class="w3-ul w3-light-grey w3-center">
-          <li class="w3-dark-grey w3-xlarge w3-padding-32">Topics for {{ country }}</li>
-          <li class="w3-padding"> <a href="{{ url_for('show_data.standard_year_selection', country= country , topic = '1' ) }}"> How electricity is produced</a></li>
-          <li class="w3-padding"> <a href="{{ url_for('show_data.standard_year_selection', country= country , topic = '2'  ) }}"> How electricity is used</a></li>
-          <li class="w3-padding"> <a href="{{ url_for('show_data.topic3', country= country ) }}"> Renewable vs non-Renewable</a></li>
-       </ul>
       </div>
-    </div>
-  </div>
 
-<!-- FINE Page Content VARIABILE -->
-
+      <!-- FINE Page Content VARIABILE -->
 
 
 
@@ -82,15 +90,3 @@
 </html>
 
 <!-- BASE COMUNE PAGINE/ PARTE 2 FINE -->
-
-
-
-
-
-
-
-
-
-
-
-

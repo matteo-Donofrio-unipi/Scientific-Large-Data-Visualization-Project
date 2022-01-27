@@ -1,26 +1,95 @@
+
+<!-- BASE COMUNE PAGINE/ PARTE 1 INIZIO -->
+<!DOCTYPE html>
+<html>
+  <title> European Electricity Dashboard </title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  
+  <!-- css style -->
+  <style>
+    body, h1,h2,h3,h4,h5,h6 {font-family: "Poppins", sans-serif}
+    .w3-row-padding img {margin-bottom: 12px}
+    /* Set the width of the sidebar to 120px */
+    .w3-sidebar {width: 120px;background: red;}
+    /* Add a left margin to the "page content" that matches the width of the sidebar (120px) */
+    #main {margin-left: 120px}
+    /* Remove margins from "page content" on small screens */
+  </style>
+  
+  <body class="w3-whitesmoke">
+
+    <!-- Icon Bar (Sidebar - hidden on small screens) -->
+    <nav class="w3-sidebar w3-bar-block w3-small w3-hide-small w3-center">
+      <!-- Avatar image in top left corner -->
+      <a href="{{ url_for('index') }}" class="w3-bar-item w3-button w3-padding-large w3-red">
+        <i class="fa fa-home w3-xxlarge"></i>
+        <p>HOME</p>
+      </a>
+      <a href="{{ url_for('show_data.info') }}" class="w3-bar-item w3-button w3-padding-large w3-hover-whitesmoke">
+        <i class="fa fa-user w3-xxlarge"></i>
+        <p>INFO</p>
+      </a>
+    </nav>
+
+      <!-- Navbar on small screens (Hidden on medium and large screens) -->
+      <div class="w3-top w3-hide-large w3-hide-medium" id="myNavbar">
+        <div class="w3-bar w3-black w3-opacity w3-hover-opacity-off w3-center w3-small">
+          <a href="{{ url_for('index') }}" class="w3-bar-item w3-button" style="width:25% !important">HOME</a>
+          <a href="{{ url_for('show_data.info') }}" class="w3-bar-item w3-button" style="width:25% !important">INFO</a>
+        </div>
+      </div>
+
+      <!-- BASE COMUNE PAGINE/ PARTE 1 FINE -->
+
+  
+  <!-- INIZIO Page Content VARIABILE -->
+
+
+<div class="w3-padding-large" id="main">
+  <!-- Header/Home -->
+    <h1 class="w3-jumbo w3-text-red">  How electricity is produced in Europe over the years</h1>
+    <p>
+      The following graph shows, for each country, the percentage of electricity produced from renewable sources of energy
+    </p>
+    <hr style="width:10vw;border:0.5vw  solid red" class="w3-round">
+
+
 <!-- Services -->
-
 <div class="w3-container" id="services" style="margin-top:75px">
-    <h1 class="w3-xxxlarge w3-text-red"><b>Overall European Renwable vs non-renwable for the year {{ year }}</b></h1>
-    <hr style="width:50px;border:5px solid red" class="w3-round">
-</div>
-
-
-  <!-- Services -->
-  <div class="w3-container" id="services" style="margin-top:75px">
-    {% block content %}
-  <div id="plotly-funnel"  class="chart"></div>
-  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  {% block content %}
+<div id="plotly-funnel"  class="chart"></div>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
-  <script>
-  var graph_tree = {{ graphJSON_choropleth | safe }};
-  Plotly.plot('plotly-funnel', graph_tree, {});
-  </script>
+<script>
+var graph_tree = {{ graphJSON_choropleth | safe }};
+Plotly.plot('plotly-funnel', graph_tree, {});
+</script>
 
 
 {% endblock %}
-  </div>
+</div>
+</div>
 
-{% extends 'base.html' %}
-</body>
-  </html>
+<!-- FINE Page Content VARIABILE -->
+
+
+
+
+      <!-- BASE COMUNE PAGINE/ PARTE 2 INIZIO -->
+      <!-- Footer -->
+      <footer class="w3-content w3-padding-64 w3-text-red w3-xlarge w3-center">
+        <p class="w3-medium">Powered by <a href="https://github.com/matteo-Donofrio-unipi" target="_blank" class="w3-hover-text-green">Matteo D'Onofrio</a></p>
+        <!-- End footer -->
+      </footer>
+    </nav>
+      
+  </body>
+</html>
+
+<!-- BASE COMUNE PAGINE/ PARTE 2 FINE -->
+
+
