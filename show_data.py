@@ -1,73 +1,130 @@
-
-import base64
-import functools
-import mimetypes
-from os import sendfile
 from flask import (
     Blueprint, flash, redirect, render_template, url_for, request
 )
-#matlplot based
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-from matplotlib.figure import Figure
-import matplotlib.pyplot as plt
-import random
-import io
-import plotly as px
 
-#plotly based
 import pandas as pd
 import json
 import plotly
 import plotly.express as px
-from plotly.subplots import make_subplots
-import plotly.io as pio
 import numpy as np
-import json
 
-#creo un blueprint chiamato auth
-#definisco url suo, che verrà preposto ad ogni view 
-#che appartiene alla stessa blueprint
+#bp is a container of views, each of the following bp.route are
+#views (functions that produce an output that can be sent to the corresponding html page  ) 
 bp = Blueprint('show_data', __name__, url_prefix='/show_data')
 
+#EACH ROUTE IS ASSOCIATED WITH AN HTML PAGE, THIS PAGE CAN BE REACHED BY TYPING THE
+# URL OF THAT ROUTE 
+# NB: SINCE THE ROUTE BELONG TO THE BLUEPRINT, EACH ROUTE URL IS PREPRENDED BY THE BLUEPRINT URL  
 
 @bp.route('/info')
 def info():
+    #IS THE VIEW OF THE INFO PAGE 
     return render_template('show_data/info.html')
 
 
+
+#a view can have some input args, they must be the same of the function handling the view
 @bp.route('/<string:country>/standard_topic_selection')
 def standard_topic_selection(country):
+    #IS THE VIEW OF THE TOPIC SELECTION 
+
+    #here the view doesen't have a proper code, just render the proper html page
+    #NB: HERE A VARIABLE (OUTPUT) IS PASSED TO THE HTML PAGE
     return render_template('show_data/standard_topic_selection.html', country=country)
 
 @bp.route('/<string:country>/<string:topic>/standard_year_selection')
 def standard_year_selection(country, topic):
+    #IS THE VIEW OF THE YEAR SELECTION 
     return render_template('show_data/standard_year_selection.html', country=country, topic=topic)
 
-@bp.route('/<string:country>/topic3')
-def topic3(country):
-    #input: chosen country
-    #output: plot converted in json (passed to html page)  
+
+
+
+@bp.route('/<string:country>/<string:topic>/<string:year>/topic1')
+def topic1(country, topic, year):
+    #IS THE VIEW OF THE GRAPH SHOWING, GIVEN A COUNTRY AND YEAR, HOW IS PRODUCED ELECTRICITY
+    #input: country and year chosen (and topic)
+    #output: plot converted in json (passed to html page) 
     df = pd.read_csv('progetto/datasets/how_produce_energy/'+country+'_how_produce_energy.csv')
+    df1 = df[['SIEC',year]] #take only the 2 columns needed 
 
-    df = df.rename(columns={'SIEC' : 'Source_of_Energy'})#rename the column 
-    df = df[df.Source_of_Energy != 'Total'] #remove the total row, not used
+    df1 = df1.rename(columns={year: "Amount", 'SIEC' : 'Source of Energy'}) #rename those columns
 
-    #define if a source of energy is or not Renewable (defined manually, so it's static)
+    df1 = df1[df1['Source of Energy'] != 'Total'] #remove the row with the total amount
+    df1.reset_index(inplace = True, drop = True)
+
+    #define a static list about the type of the source energy (defined manually by looking at the source)
     type_list=['Non Renewable','Renewable','Non Renewable','Non Renewable','Renewable','Non Renewable','Non Renewable','Renewable','Renewable','Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Renewable','Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Renewable','Non Renewable','Non Renewable','Non Renewable','Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Renewable','Renewable','Renewable','Renewable','Non Renewable','Non Renewable','Renewable','Renewable','Renewable','Non Renewable','Renewable','Non Renewable','Renewable']
-    df['Type'] = type_list
+    df1['Type'] = type_list #add this new column
 
-    df=df.replace(",","", regex=True) #remove comma from values in order to cast them to float (regex allow to substitute even substrings)
+    #transform the Amount column from strings to float (if needed), done using a temporary list
+    if(isinstance(df1.iloc[0]['Amount'], str)):
+        value_list = df1['Amount']
+        value_list = [w.replace(',', '') for w in value_list]
+        value_list2=[float(i) for i in value_list]
+        df1['Amount'] = value_list2 #assign the column of float
 
-    df_for_area=produce_table_for_topic3(df)
+    df1 = df1[df1.Amount > 0] #remove energy source having Amount=0
 
-    fig_area = px.area(df_for_area, x="year", y=['Renewable','Non Renewable'], color_discrete_sequence=px.colors.qualitative.Dark2, color_discrete_map={ # replaces default color mapping by value
-                "Non Renewable": 'Orange', 'Renewable':'green'}, title='Percentage'  )
-    graphJSON_area = json.dumps(fig_area, cls=plotly.utils.PlotlyJSONEncoder)
+    fig_funnel = px.funnel(df1, x='Amount', y='Source of Energy', color='Type', color_discrete_sequence=px.colors.qualitative.Dark2, color_discrete_map={ # replaces default color mapping by value
+                "Renewable": 'Green', "Non Renewable": 'Orange'})
+    fig_pie = px.pie(df1, values='Amount', names='Type', color = 'Type', title='Renewable vs Non Renewable sources of energy comparison', color_discrete_sequence=px.colors.qualitative.Dark2, color_discrete_map={'Renewable':'green','Non Renewable':'orange'})
 
-    return render_template('show_data/topic3.html', country=country, graphJSON_area=graphJSON_area)
+    graphJSON_funnel = json.dumps(fig_funnel, cls=plotly.utils.PlotlyJSONEncoder)
+    graphJSON_pie = json.dumps(fig_pie, cls=plotly.utils.PlotlyJSONEncoder)
 
 
-#define the new df used by topic3 (a df tracking for each year, the % of Renewable and not Renewable source of energy converted to electricity)
+    return render_template('show_data/topic1.html', country=country, topic=topic, year=year, graphJSON_funnel=graphJSON_funnel, graphJSON_pie=graphJSON_pie)
+
+
+
+@bp.route('/<string:country>/<string:topic>/<string:year>/topic2')
+def topic2(country, topic, year):
+    #IS THE VIEW OF A GRAPH SHOWING, GIVEN A COUNTRY AND YEAR, HOW ENERGY IS USED (IN WHICH SECTORS)   
+    #input: country, topic and year chosen by user
+    #output: plot converted in json (passed to html)
+
+
+    df = pd.read_csv('progetto/datasets/how_energy_is_used/'+country+'_how_energy_is_used.csv')
+    df = df[df.Use != 'energy use'] #remove first row (containing total energy used for each year)
+    df.reset_index(inplace = True, drop = True)
+    df = df[['Use',year]] #take only the 2 columns needed 
+    
+    type_list = [] #create a new column with the main category for each different use
+    for i in range (len(df)):
+        if (df.iloc[i]['Use'].startswith('industry')):
+            type_list.append('Industry')
+        if (df.iloc[i]['Use'].startswith('transport')):
+            type_list.append('Transport')
+        if (df.iloc[i]['Use'].startswith('other')):
+            type_list.append('Other')
+        if(isinstance(df.iloc[i][year],str)):
+            df.iloc[i][year]=df.iloc[i][year].replace(",","") #replace the comma in values in order to convert them to float
+
+        split_string = df.iloc[i]['Use'].split("-", 3) #take only the core of "Use" description
+        if(split_string[1]==' non'):
+            df.iloc[i]['Use']=split_string[2]
+        else:
+            df.iloc[i]['Use']=split_string[1]
+
+    df['Type']=type_list #add the new category column 
+    df = df.rename(columns={year: "Amount"})
+
+    fig_tree = px.treemap(df, path=['Type','Use'], values = 'Amount', color='Type', color_discrete_sequence=px.colors.qualitative.Dark2, color_discrete_map={ # replaces default color mapping by value
+                "Industry": 'Orange', "Other": '#2E91E5', 'Transport':'green'})
+
+    fig_pie = px.pie(df, values='Amount', names='Type', title='Sectors comparison', color='Type', color_discrete_sequence=px.colors.qualitative.Dark2, color_discrete_map={ # replaces default color mapping by value
+                "Industry": 'Orange', "Other": '#2E91E5', 'Transport':'green'} )
+
+
+    graphJSON_tree = json.dumps(fig_tree, cls=plotly.utils.PlotlyJSONEncoder)
+    graphJSON_pie = json.dumps(fig_pie, cls=plotly.utils.PlotlyJSONEncoder)
+
+    return render_template('show_data/topic2.html', country=country, topic=topic, year=year, graphJSON_tree=graphJSON_tree, graphJSON_pie=graphJSON_pie)
+
+
+
+
 def produce_table_for_topic3(df):
     #input: table containing, for a country, as many rows as many source of energy converted in electricity & as many col as many year considered (1990-2020)
     #       each value is the amount of that source converted in that year
@@ -108,38 +165,30 @@ def produce_table_for_topic3(df):
     
     return df2
 
-@bp.route('/<string:country>/<string:topic>/<string:year>/topic1')
-def topic1(country, topic, year):
+@bp.route('/<string:country>/topic3')
+def topic3(country):
+    #IS THE VIEW OF THE GRAPH SHOWING, GIVEN A COUNTRY, THE TREND OVER YEARS OF % OF RENWABLE ENERGY 
+    #input: chosen country
+    #output: plot converted in json (passed to html page)  
     df = pd.read_csv('progetto/datasets/how_produce_energy/'+country+'_how_produce_energy.csv')
-    df1 = df[['SIEC',year]] #take only the 2 columns needed 
 
-    df1 = df1.rename(columns={year: "Amount", 'SIEC' : 'Source of Energy'}) #rename those columns
+    df = df.rename(columns={'SIEC' : 'Source_of_Energy'})#rename the column 
+    df = df[df.Source_of_Energy != 'Total'] #remove the total row, not used
 
-    df1 = df1[df1['Source of Energy'] != 'Total'] #remove the row with the total amount
-    df1.reset_index(inplace = True, drop = True)
-
-    #define a static list about the type of the source energy (defined manually by looking at the source)
+    #define if a source of energy is or not Renewable (defined manually, so it's static)
     type_list=['Non Renewable','Renewable','Non Renewable','Non Renewable','Renewable','Non Renewable','Non Renewable','Renewable','Renewable','Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Renewable','Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Renewable','Non Renewable','Non Renewable','Non Renewable','Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Renewable','Renewable','Renewable','Renewable','Non Renewable','Non Renewable','Renewable','Renewable','Renewable','Non Renewable','Renewable','Non Renewable','Renewable']
-    df1['Type'] = type_list #add this new column
+    df['Type'] = type_list
 
-    #transform the Amount column from strings to float (if needed), done using a temporary list
-    if(isinstance(df1.iloc[0]['Amount'], str)):
-        value_list = df1['Amount']
-        value_list = [w.replace(',', '') for w in value_list]
-        value_list2=[float(i) for i in value_list]
-        df1['Amount'] = value_list2 #assign the column of float
+    df=df.replace(",","", regex=True) #remove comma from values in order to cast them to float (regex allow to substitute even substrings)
 
-    df1 = df1[df1.Amount > 0] #remove energy source having Amount=0
+    df_for_area=produce_table_for_topic3(df)
 
-    fig_funnel = px.funnel(df1, x='Amount', y='Source of Energy', color='Type', color_discrete_sequence=px.colors.qualitative.Dark2, color_discrete_map={ # replaces default color mapping by value
-                "Renewable": 'Green', "Non Renewable": 'Orange'})
-    fig_pie = px.pie(df1, values='Amount', names='Type', color = 'Type', title='Renewable vs Non Renewable sources of energy comparison', color_discrete_sequence=px.colors.qualitative.Dark2, color_discrete_map={'Renewable':'green','Non Renewable':'orange'})
+    fig_area = px.area(df_for_area, x="year", y=['Renewable','Non Renewable'], color_discrete_sequence=px.colors.qualitative.Dark2, color_discrete_map={ # replaces default color mapping by value
+                "Non Renewable": 'Orange', 'Renewable':'green'}, title='Percentage'  )
+    graphJSON_area = json.dumps(fig_area, cls=plotly.utils.PlotlyJSONEncoder)
 
-    graphJSON_funnel = json.dumps(fig_funnel, cls=plotly.utils.PlotlyJSONEncoder)
-    graphJSON_pie = json.dumps(fig_pie, cls=plotly.utils.PlotlyJSONEncoder)
+    return render_template('show_data/topic3.html', country=country, graphJSON_area=graphJSON_area)
 
-
-    return render_template('show_data/topic1.html', country=country, topic=topic, year=year, graphJSON_funnel=graphJSON_funnel, graphJSON_pie=graphJSON_pie)
 
 
 def produce_table_for_topic4(df_countries,year):
@@ -193,7 +242,7 @@ def produce_table_for_topic4(df_countries,year):
                 if(df.iloc[j]['Type']=='Renewable'):
                     tot_r+=df.iloc[j][year] #take the sum of Renewable energy produced in a year
         
-            perc_r = tot_r / tot #compute %
+            perc_r = float(str(round(tot_r / tot, 2))) #compute %
         else:
             perc_r = -1
         value_list.append(perc_r) #add percentage to list
@@ -202,10 +251,9 @@ def produce_table_for_topic4(df_countries,year):
 
     return df_countries
 
-
-
 @bp.route('/<string:country>/<string:topic>/<string:year>/topic4')
 def topic4(country, topic, year):
+    #IS THE VIEW OF THE GRAPH SHOWING, GIVEN A YEAR, THE % OF RENEWABLE SOURCES OF ENERGY CONVERTED BY ALL EUROPEAN COUNTRIES  
     #input: country and topic are not used (but needed due to simplicity), year is the year chosen by user
     #output: choropleth in json format (passed to html)
 
@@ -241,49 +289,6 @@ def topic4(country, topic, year):
     graphJSON_choropleth = json.dumps(fig_choropleth, cls=plotly.utils.PlotlyJSONEncoder)
 
     return render_template('show_data/topic4.html', year=year, graphJSON_choropleth=graphJSON_choropleth )
-
-@bp.route('/<string:country>/<string:topic>/<string:year>/topic2')
-def topic2(country, topic, year):
-    #input: country, topic and year chosen by user
-    #output: plot converted in json (passed to html)
-
-
-    df = pd.read_csv('progetto/datasets/how_energy_is_used/'+country+'_how_energy_is_used.csv')
-    df = df[df.Use != 'energy use'] #remove first row (containing total energy used for each year)
-    df.reset_index(inplace = True, drop = True)
-    df = df[['Use',year]] #take only the 2 columns needed 
-    
-    type_list = [] #create a new column with the main category for each different use
-    for i in range (len(df)):
-        if (df.iloc[i]['Use'].startswith('industry')):
-            type_list.append('Industry')
-        if (df.iloc[i]['Use'].startswith('transport')):
-            type_list.append('Transport')
-        if (df.iloc[i]['Use'].startswith('other')):
-            type_list.append('Other')
-        if(isinstance(df.iloc[i][year],str)):
-            df.iloc[i][year]=df.iloc[i][year].replace(",","") #replace the comma in values in order to convert them to float
-
-        split_string = df.iloc[i]['Use'].split("-", 3) #take only the core of "Use" description
-        if(split_string[1]==' non'):
-            df.iloc[i]['Use']=split_string[2]
-        else:
-            df.iloc[i]['Use']=split_string[1]
-
-    df['Type']=type_list #add the new category column 
-    df = df.rename(columns={year: "Amount"})
-
-    fig_tree = px.treemap(df, path=['Type','Use'], values = 'Amount', color='Type', color_discrete_sequence=px.colors.qualitative.Dark2, color_discrete_map={ # replaces default color mapping by value
-                "Industry": 'Orange', "Other": '#2E91E5', 'Transport':'green'})
-
-    fig_pie = px.pie(df, values='Amount', names='Type', title='Sectors comparison', color='Type', color_discrete_sequence=px.colors.qualitative.Dark2, color_discrete_map={ # replaces default color mapping by value
-                "Industry": 'Orange', "Other": '#2E91E5', 'Transport':'green'} )
-
-
-    graphJSON_tree = json.dumps(fig_tree, cls=plotly.utils.PlotlyJSONEncoder)
-    graphJSON_pie = json.dumps(fig_pie, cls=plotly.utils.PlotlyJSONEncoder)
-
-    return render_template('show_data/topic2.html', country=country, topic=topic, year=year, graphJSON_tree=graphJSON_tree, graphJSON_pie=graphJSON_pie)
 
 
 
