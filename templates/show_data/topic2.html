@@ -61,7 +61,6 @@
     {% block content %}
   <div id="plotly-tree"  class="chart"></div>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
   <script>
   var graph_tree = {{ graphJSON_tree | safe }};
   Plotly.plot('plotly-tree', graph_tree, {});

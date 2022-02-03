@@ -51,7 +51,7 @@
 
 <div class="w3-padding-large" id="main">
   <!-- Header/Home -->
-    <h1 class="w3-jumbo w3-text-red">  How electricity is produced in Europe over the years</h1>
+    <h1 class="w3-jumbo w3-text-red">  How electricity is produced in Europe in the year {{ year }}</h1>
     <p>
       The following graph shows, for each country, the percentage of electricity produced from renewable sources of energy
     </p>
@@ -63,7 +63,6 @@
   {% block content %}
 <div id="plotly-funnel"  class="chart"></div>
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
 <script>
 var graph_tree = {{ graphJSON_choropleth | safe }};
 Plotly.plot('plotly-funnel', graph_tree, {});
