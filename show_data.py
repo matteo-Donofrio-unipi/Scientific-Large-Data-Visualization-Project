@@ -291,7 +291,94 @@ def topic4(country, topic, year):
     return render_template('show_data/topic4.html', year=year, graphJSON_choropleth=graphJSON_choropleth )
 
 
+def produce_table_for_topic5(df_countries, year):
+     #input: year chosen & df empty whose col are = ['Name','Renewable percentage']
+    #output: table containing, as many rows as many countries in EU, col = % of renewable energy converted in electricity in the year considered
 
+
+    #here we build a df st: for each country we def the % of Renewable source of energy used 
+    
+    #here we build a list of names that will be taken from the json file, a list of country of interest, since the json contains name 
+    #of all countries of the world
+
+    name_list_json = ['Albania', 'Austria', 'Belgium', 'Bosnia and Herzegovina', 'Bulgaria', 'Croatia', 'Cyprus', 'Czech Republic', 'Denmark', 'Estonia',
+            'Finland', 'France', 'Georgia', 'Germany', 'Greece', 'Hungary', 'Iceland', 'Ireland', 'Italy', 'Latvia', 'Lithuania', 'Luxembourg',
+            'Malta', 'Montenegro', 'Netherlands', 'Montenegro', 'The former Yugoslav Republic of Macedonia', 'Norway', 'Poland', 'Portugal',
+            'Romania', 'Serbia', 'Slovakia', 'Slovenia', 'Spain', 'Sweden', 'Turkey', 'Ukraine', 'United Kingdom']
+
+    #list of countries of interest, written in the same way of csv datasets, in order to scan the list and access datasets
+
+    name_list_csv = ['Albania', 'Austria', 'Belgium', 'Bosnia_and_Herzegovina', 'Bulgaria', 'Croatia', 'Cyprus', 'Czech_Rep', 'Denmark', 'Estonia',
+            'Finland', 'France', 'Georgia', 'Germany', 'Greece', 'Hungary', 'Iceland', 'Ireland', 'Italy', 'Latvia', 'Lithuania', 'Luxembourg',
+            'Malta', 'Montenegro', 'Netherlands', 'Montenegro', 'Macedonia', 'Norway', 'Poland', 'Portugal',
+            'Romania', 'Serbia', 'Slovakia', 'Slovenia', 'Spain', 'Sweden', 'Turkey', 'Ukraine', 'United_Kingdom']
+
+    #list defined manually to track which source of energy is Renewable or isn't
+    type_list=['Non Renewable','Renewable','Non Renewable','Non Renewable','Renewable','Non Renewable','Non Renewable','Renewable','Renewable','Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Renewable','Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Renewable','Non Renewable','Non Renewable','Non Renewable','Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Renewable','Renewable','Renewable','Renewable','Non Renewable','Non Renewable','Renewable','Renewable','Renewable','Non Renewable','Renewable','Non Renewable','Renewable']
+
+    #this list will contain the % for each country
+    value_list=[]
+
+
+    df_countries['Name']=name_list_json
+
+    for i in (name_list_csv):
+        df = pd.read_csv('progetto/datasets//how_energy_is_used/'+i+'_how_energy_is_used.csv')
+        df = df[['Use',year]]
+        df=df.replace(",","", regex=True)
+        
+        df[year] = pd.to_numeric(df[year], downcast="float")
+        df = df[df.Use != 'Total']
+        
+        tot=0    
+        
+        tot = df[year].sum()
+        if(tot==0):
+            tot = -1
+        value_list.append(tot)
+        
+    df_countries['Total Consumption']=value_list
+    return df_countries
+
+
+@bp.route('/<string:country>/<string:topic>/<string:year>/topic5')
+def topic5(country, topic, year):
+    #IS THE VIEW OF THE GRAPH SHOWING, GIVEN A YEAR, THE % OF RENEWABLE SOURCES OF ENERGY CONVERTED BY ALL EUROPEAN COUNTRIES  
+    #input: country and topic are not used (but needed due to simplicity), year is the year chosen by user
+    #output: choropleth in json format (passed to html)
+
+    df_countries = pd.DataFrame(columns=['Name','Renewable percentage'])
+
+    df_for_choropleth= produce_table_for_topic5(df_countries,year)
+
+    #here is used a json file defining the european structure, used for build the map,
+    #each country in the json file is associated with a set of metadata,
+    #metadata of a country i is given by "data['features'][i].keys()",
+    #initially, for each country, metadata is only-> ['type', 'properties', 'geometry'],
+    #then we add manually another one called 'Name' containing the name of the country, it will be used by the choropleth to find the country
+    
+    file_json = open('progetto/datasets/countries.json', 'r')
+
+    data_json = json.load(file_json)
+    for features in data_json['features']:
+        features['Name'] = features['properties']['NAME']
+
+    #now for each country, metadata is-> ['type', 'properties', 'geometry', 'Name']
+
+    #locations & color, refer to the attribute in the dataframe from which take values
+    #featureidkey="Name" is used to match the name of the country in the dataframe with the name of the country in the json(they've same attribute name)
+    fig_choropleth = px.choropleth(df_for_choropleth, geojson=data_json, locations='Name', color='Total Consumption',
+                           color_continuous_scale="Viridis",
+                           range_color=(0, 100000),
+                           scope="europe",
+                           labels={'Total Consumption':'Total Consumption'},
+                           featureidkey="Name"
+                          )
+    fig_choropleth.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+
+    graphJSON_choropleth = json.dumps(fig_choropleth, cls=plotly.utils.PlotlyJSONEncoder)
+
+    return render_template('show_data/topic5.html', year=year, graphJSON_choropleth=graphJSON_choropleth )
 
 
 
