@@ -47,13 +47,14 @@
 
   
   <!-- INIZIO Page Content VARIABILE -->
+<!-- Services -->
 
 
 <div class="w3-padding-large" id="main">
   <!-- Header/Home -->
-    <h1 class="w3-jumbo w3-text-red">  How electricity is produced in Europe in the year {{ year }}</h1>
-    <p>
-      The following graph shows, for each country, the percentage of electricity produced from renewable sources of energy
+    <h1 class="w3-jumbo w3-text-red"> How energy is used in {{country}} over the years </h1>
+    <p>The following values are the average KTOE of electricity used every year, for each sector.
+    The presence of a 0 value means that there is no available data for that year.
     </p>
     <hr style="width:10vw;border:0.5vw  solid red" class="w3-round">
 
@@ -61,13 +62,12 @@
 <!-- Services -->
 <div class="w3-container" id="services" style="margin-top:75px">
   {% block content %}
-<div id="plotly-funnel"  class="chart"></div>
+<div id="plotly-line"  class="chart"></div>
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <script>
-var graph_tree = {{ graphJSON_choropleth | safe }};
-Plotly.plot('plotly-funnel', graph_tree, {});
+var graph_tree = {{ graphJSON_area| safe }};
+Plotly.plot('plotly-line', graph_tree, {});
 </script>
-
 
 {% endblock %}
 </div>
@@ -90,5 +90,24 @@ Plotly.plot('plotly-funnel', graph_tree, {});
 </html>
 
 <!-- BASE COMUNE PAGINE/ PARTE 2 FINE -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

@@ -58,8 +58,9 @@
         <ul class="w3-ul w3-light-grey w3-center">
           <li class="w3-dark-grey w3-xlarge w3-padding-32">Topics for {{ country }}</li>
           <li class="w3-padding"> <a href="{{ url_for('show_data.standard_year_selection', country= country , topic = '1' ) }}"> How electricity is produced</a></li>
-          <li class="w3-padding"> <a href="{{ url_for('show_data.standard_year_selection', country= country , topic = '2'  ) }}"> How electricity is used</a></li>
-          <li class="w3-padding"> <a href="{{ url_for('show_data.topic3', country= country ) }}"> Renewable vs non-Renewable</a></li>
+          <li class="w3-padding"> <a href="{{ url_for('show_data.topic2', country= country ) }}"> How electricity is produced over the years</a></li>
+          <li class="w3-padding"> <a href="{{ url_for('show_data.standard_year_selection', country= country , topic = '3'  ) }}"> How electricity is used</a></li>
+          <li class="w3-padding"> <a href="{{ url_for('show_data.topic4', country= country ) }}"> How electricity is used during the years</a></li>
        </ul>
       </div>
     </div>

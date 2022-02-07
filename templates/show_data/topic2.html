@@ -51,29 +51,25 @@
 
 <div class="w3-padding-large" id="main">
   <!-- Header/Home -->
-    <h1 class="w3-jumbo w3-text-red">  How electricity is used in {{ country }} during {{ year }}</h1>
-    <p>The following are the different sectors in which is used the electricity</p>
+    <h1 class="w3-jumbo w3-text-red">  How electricity is produced in {{ country }} over the years </h1>
+    <p>The following graph shows the comparison between the percentage of electricity produced from renewable sources of energy
+      and the percentage from non-renewable sources
+    </p>
     <hr style="width:10vw;border:0.5vw  solid red" class="w3-round">
 
 
-  <!-- Services -->
-  <div class="w3-container" id="services" style="margin-top:75px">
-    {% block content %}
-  <div id="plotly-tree"  class="chart"></div>
-  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-  <script>
-  var graph_tree = {{ graphJSON_tree | safe }};
-  Plotly.plot('plotly-tree', graph_tree, {});
-  </script>
+<!-- Services -->
+<div class="w3-container" id="services" style="margin-top:75px">
+  {% block content %}
+<div id="plotly-funnel"  class="chart"></div>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script>
+var graph_tree = {{ graphJSON_area | safe }};
+Plotly.plot('plotly-funnel', graph_tree, {});
+</script>
 
-<div id="plotly-pie"  class="chart"></div>
-  <script>
-  var graph_pie = {{ graphJSON_pie | safe }};
-  Plotly.plot('plotly-pie', graph_pie, {});
-  </script>
 
 {% endblock %}
-  </div>
 </div>
 
 <!-- FINE Page Content VARIABILE -->
@@ -93,48 +89,6 @@
 </html>
 
 <!-- BASE COMUNE PAGINE/ PARTE 2 FINE -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
