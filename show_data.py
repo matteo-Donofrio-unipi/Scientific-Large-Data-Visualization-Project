@@ -66,16 +66,19 @@ def topic1(country, topic, year):
 
     df1 = df1[df1.Amount > 0] #remove energy source having Amount=0
 
-    fig_funnel = px.funnel(df1, x='Amount', y='Source of Energy', color='Type', color_discrete_sequence=px.colors.qualitative.Dark2, color_discrete_map={ # replaces default color mapping by value
-                "Renewable": 'Green', "Non Renewable": 'Orange'})
-    fig_pie = px.pie(df1, values='Amount', names='Type', color = 'Type', title='Renewable vs Non Renewable sources of energy comparison', color_discrete_sequence=px.colors.qualitative.Dark2, color_discrete_map={'Renewable':'green','Non Renewable':'orange'})
+    if(len(df1)>0):
 
-    graphJSON_funnel = json.dumps(fig_funnel, cls=plotly.utils.PlotlyJSONEncoder)
-    graphJSON_pie = json.dumps(fig_pie, cls=plotly.utils.PlotlyJSONEncoder)
+        fig_funnel = px.funnel(df1, x='Amount', y='Source of Energy', color='Type', color_discrete_sequence=px.colors.qualitative.Dark2, color_discrete_map={ # replaces default color mapping by value
+                    "Renewable": 'Green', "Non Renewable": 'Orange'})
+        fig_pie = px.pie(df1, values='Amount', names='Type', color = 'Type', title='Renewable vs Non Renewable sources of energy comparison', color_discrete_sequence=px.colors.qualitative.Dark2, color_discrete_map={'Renewable':'green','Non Renewable':'orange'})
+
+        graphJSON_funnel = json.dumps(fig_funnel, cls=plotly.utils.PlotlyJSONEncoder)
+        graphJSON_pie = json.dumps(fig_pie, cls=plotly.utils.PlotlyJSONEncoder)
 
 
-    return render_template('show_data/topic1.html', country=country, topic=topic, year=year, graphJSON_funnel=graphJSON_funnel, graphJSON_pie=graphJSON_pie)
-
+        return render_template('show_data/topic1.html', country=country, topic=topic, year=year, graphJSON_funnel=graphJSON_funnel, graphJSON_pie=graphJSON_pie)
+    else:
+        return render_template('show_data/ErrorPage.html')
 
 
 @bp.route('/<string:country>/<string:topic>/<string:year>/topic2')
@@ -110,18 +113,21 @@ def topic2(country, topic, year):
     df['Type']=type_list #add the new category column 
     df = df.rename(columns={year: "Amount"})
 
-    fig_tree = px.treemap(df, path=['Type','Use'], values = 'Amount', color='Type', color_discrete_sequence=px.colors.qualitative.Dark2, color_discrete_map={ # replaces default color mapping by value
-                "Industry": 'Orange', "Other": '#2E91E5', 'Transport':'green'})
+    if(df.Amount.sum() > 0):
 
-    fig_pie = px.pie(df, values='Amount', names='Type', title='Sectors comparison', color='Type', color_discrete_sequence=px.colors.qualitative.Dark2, color_discrete_map={ # replaces default color mapping by value
-                "Industry": 'Orange', "Other": '#2E91E5', 'Transport':'green'} )
+        fig_tree = px.treemap(df, path=['Type','Use'], values = 'Amount', color='Type', color_discrete_sequence=px.colors.qualitative.Dark2, color_discrete_map={ # replaces default color mapping by value
+                    "Industry": 'Orange', "Other": '#2E91E5', 'Transport':'green'})
+
+        fig_pie = px.pie(df, values='Amount', names='Type', title='Sectors comparison', color='Type', color_discrete_sequence=px.colors.qualitative.Dark2, color_discrete_map={ # replaces default color mapping by value
+                    "Industry": 'Orange', "Other": '#2E91E5', 'Transport':'green'} )
 
 
-    graphJSON_tree = json.dumps(fig_tree, cls=plotly.utils.PlotlyJSONEncoder)
-    graphJSON_pie = json.dumps(fig_pie, cls=plotly.utils.PlotlyJSONEncoder)
+        graphJSON_tree = json.dumps(fig_tree, cls=plotly.utils.PlotlyJSONEncoder)
+        graphJSON_pie = json.dumps(fig_pie, cls=plotly.utils.PlotlyJSONEncoder)
 
-    return render_template('show_data/topic2.html', country=country, topic=topic, year=year, graphJSON_tree=graphJSON_tree, graphJSON_pie=graphJSON_pie)
-
+        return render_template('show_data/topic2.html', country=country, topic=topic, year=year, graphJSON_tree=graphJSON_tree, graphJSON_pie=graphJSON_pie)
+    else:
+        return render_template('show_data/ErrorPage.html')
 
 
 
