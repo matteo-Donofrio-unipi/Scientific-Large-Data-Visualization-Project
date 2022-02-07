@@ -22,6 +22,12 @@ def info():
     return render_template('show_data/info.html')
 
 
+@bp.route('/ErrorPage')
+def ErrorPage():
+    #IS THE VIEW OF THE INFO PAGE 
+    return render_template('show_data/ErrorPage.html')
+
+
 
 #a view can have some input args, they must be the same of the function handling the view
 @bp.route('/<string:country>/standard_topic_selection')
@@ -39,7 +45,7 @@ def standard_year_selection(country, topic):
 
 
 
-
+#old1
 @bp.route('/<string:country>/<string:topic>/<string:year>/topic1')
 def topic1(country, topic, year):
     #IS THE VIEW OF THE GRAPH SHOWING, GIVEN A COUNTRY AND YEAR, HOW IS PRODUCED ELECTRICITY
@@ -56,13 +62,9 @@ def topic1(country, topic, year):
     #define a static list about the type of the source energy (defined manually by looking at the source)
     type_list=['Non Renewable','Renewable','Non Renewable','Non Renewable','Renewable','Non Renewable','Non Renewable','Renewable','Renewable','Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Renewable','Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Renewable','Non Renewable','Non Renewable','Non Renewable','Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Non Renewable','Renewable','Renewable','Renewable','Renewable','Non Renewable','Non Renewable','Renewable','Renewable','Renewable','Non Renewable','Renewable','Non Renewable','Renewable']
     df1['Type'] = type_list #add this new column
-
-    #transform the Amount column from strings to float (if needed), done using a temporary list
-    if(isinstance(df1.iloc[0]['Amount'], str)):
-        value_list = df1['Amount']
-        value_list = [w.replace(',', '') for w in value_list]
-        value_list2=[float(i) for i in value_list]
-        df1['Amount'] = value_list2 #assign the column of float
+    
+    df1=df1.replace(",","", regex=True)
+    df1['Amount'] = pd.to_numeric(df1['Amount'], downcast="float") 
 
     df1 = df1[df1.Amount > 0] #remove energy source having Amount=0
 
@@ -81,57 +83,9 @@ def topic1(country, topic, year):
         return render_template('show_data/ErrorPage.html')
 
 
-@bp.route('/<string:country>/<string:topic>/<string:year>/topic2')
-def topic2(country, topic, year):
-    #IS THE VIEW OF A GRAPH SHOWING, GIVEN A COUNTRY AND YEAR, HOW ENERGY IS USED (IN WHICH SECTORS)   
-    #input: country, topic and year chosen by user
-    #output: plot converted in json (passed to html)
 
-
-    df = pd.read_csv('progetto/datasets/how_energy_is_used/'+country+'_how_energy_is_used.csv')
-    df = df[df.Use != 'energy use'] #remove first row (containing total energy used for each year)
-    df.reset_index(inplace = True, drop = True)
-    df = df[['Use',year]] #take only the 2 columns needed 
-    
-    type_list = [] #create a new column with the main category for each different use
-    for i in range (len(df)):
-        if (df.iloc[i]['Use'].startswith('industry')):
-            type_list.append('Industry')
-        if (df.iloc[i]['Use'].startswith('transport')):
-            type_list.append('Transport')
-        if (df.iloc[i]['Use'].startswith('other')):
-            type_list.append('Other')
-        if(isinstance(df.iloc[i][year],str)):
-            df.iloc[i][year]=df.iloc[i][year].replace(",","") #replace the comma in values in order to convert them to float
-
-        split_string = df.iloc[i]['Use'].split("-", 3) #take only the core of "Use" description
-        if(split_string[1]==' non'):
-            df.iloc[i]['Use']=split_string[2]
-        else:
-            df.iloc[i]['Use']=split_string[1]
-
-    df['Type']=type_list #add the new category column 
-    df = df.rename(columns={year: "Amount"})
-
-    if(df.Amount.sum() > 0):
-
-        fig_tree = px.treemap(df, path=['Type','Use'], values = 'Amount', color='Type', color_discrete_sequence=px.colors.qualitative.Dark2, color_discrete_map={ # replaces default color mapping by value
-                    "Industry": 'Orange', "Other": '#2E91E5', 'Transport':'green'})
-
-        fig_pie = px.pie(df, values='Amount', names='Type', title='Sectors comparison', color='Type', color_discrete_sequence=px.colors.qualitative.Dark2, color_discrete_map={ # replaces default color mapping by value
-                    "Industry": 'Orange', "Other": '#2E91E5', 'Transport':'green'} )
-
-
-        graphJSON_tree = json.dumps(fig_tree, cls=plotly.utils.PlotlyJSONEncoder)
-        graphJSON_pie = json.dumps(fig_pie, cls=plotly.utils.PlotlyJSONEncoder)
-
-        return render_template('show_data/topic2.html', country=country, topic=topic, year=year, graphJSON_tree=graphJSON_tree, graphJSON_pie=graphJSON_pie)
-    else:
-        return render_template('show_data/ErrorPage.html')
-
-
-
-def produce_table_for_topic3(df):
+#old prod for 3
+def produce_table_for_topic2(df):
     #input: table containing, for a country, as many rows as many source of energy converted in electricity & as many col as many year considered (1990-2020)
     #       each value is the amount of that source converted in that year
     #output: table containing, for a country, as many rows as years considered & col = tot energy converted, % renewable, % non-renewable
@@ -171,8 +125,10 @@ def produce_table_for_topic3(df):
     
     return df2
 
-@bp.route('/<string:country>/topic3')
-def topic3(country):
+
+#old3
+@bp.route('/<string:country>/topic2')
+def topic2(country):
     #IS THE VIEW OF THE GRAPH SHOWING, GIVEN A COUNTRY, THE TREND OVER YEARS OF % OF RENWABLE ENERGY 
     #input: chosen country
     #output: plot converted in json (passed to html page)  
@@ -187,17 +143,127 @@ def topic3(country):
 
     df=df.replace(",","", regex=True) #remove comma from values in order to cast them to float (regex allow to substitute even substrings)
 
-    df_for_area=produce_table_for_topic3(df)
+    df_for_area=produce_table_for_topic2(df)
 
     fig_area = px.area(df_for_area, x="year", y=['Renewable','Non Renewable'], color_discrete_sequence=px.colors.qualitative.Dark2, color_discrete_map={ # replaces default color mapping by value
                 "Non Renewable": 'Orange', 'Renewable':'green'}, title='Percentage'  )
     graphJSON_area = json.dumps(fig_area, cls=plotly.utils.PlotlyJSONEncoder)
 
-    return render_template('show_data/topic3.html', country=country, graphJSON_area=graphJSON_area)
+    return render_template('show_data/topic2.html', country=country, graphJSON_area=graphJSON_area)
+
+
+#old2
+@bp.route('/<string:country>/<string:topic>/<string:year>/topic3')
+def topic3(country, topic, year):
+    #IS THE VIEW OF A GRAPH SHOWING, GIVEN A COUNTRY AND YEAR, HOW ENERGY IS USED (IN WHICH SECTORS)   
+    #input: country, topic and year chosen by user
+    #output: plot converted in json (passed to html)
+
+
+    df = pd.read_csv('progetto/datasets/how_energy_is_used/'+country+'_how_energy_is_used.csv')
+    df = df[df.Use != 'energy use'] #remove first row (containing total energy used for each year)
+    df.reset_index(inplace = True, drop = True)
+    df = df[['Use',year]] #take only the 2 columns needed 
+    
+    type_list = [] #create a new column with the main category for each different use
+    for i in range (len(df)):
+        if (df.iloc[i]['Use'].startswith('industry')):
+            type_list.append('Industry')
+        if (df.iloc[i]['Use'].startswith('transport')):
+            type_list.append('Transport')
+        if (df.iloc[i]['Use'].startswith('other')):
+            type_list.append('Other')
+        if(isinstance(df.iloc[i][year],str)):
+            df.iloc[i][year]=df.iloc[i][year].replace(",","") #replace the comma in values in order to convert them to float
+
+        split_string = df.iloc[i]['Use'].split("-", 3) #take only the core of "Use" description
+        if(split_string[1]==' non'):
+            df.iloc[i]['Use']=split_string[2]
+        else:
+            df.iloc[i]['Use']=split_string[1]
+
+    df['Type']=type_list #add the new category column 
+    df = df.rename(columns={year: "Amount"})
+
+    df['Amount'] = pd.to_numeric(df['Amount'], downcast="float") 
+
+    if(df.Amount.sum() > 0):
+
+        fig_tree = px.treemap(df, path=['Type','Use'], values = 'Amount', color='Type', color_discrete_sequence=px.colors.qualitative.Dark2, color_discrete_map={ # replaces default color mapping by value
+                    "Industry": 'Orange', "Other": '#2E91E5', 'Transport':'green'})
+
+        fig_pie = px.pie(df, values='Amount', names='Type', title='Sectors comparison', color='Type', color_discrete_sequence=px.colors.qualitative.Dark2, color_discrete_map={ # replaces default color mapping by value
+                    "Industry": 'Orange', "Other": '#2E91E5', 'Transport':'green'} )
+
+
+        graphJSON_tree = json.dumps(fig_tree, cls=plotly.utils.PlotlyJSONEncoder)
+        graphJSON_pie = json.dumps(fig_pie, cls=plotly.utils.PlotlyJSONEncoder)
+
+        return render_template('show_data/topic3.html', country=country, topic=topic, year=year, graphJSON_tree=graphJSON_tree, graphJSON_pie=graphJSON_pie)
+    else:
+        return render_template('show_data/ErrorPage.html')
+
+
+#old6
+@bp.route('/<string:country>/topic4')
+def topic4(country):
+    #IS THE VIEW OF THE GRAPH SHOWING, GIVEN A COUNTRY, THE TREND OVER YEARS OF HOW ENERGY IS USED, DIVIDED INTO SECTORS
+    #input: chosen country
+    #output: plot converted in json (passed to html page)
+
+    #create the new dataframe, it will be used in the plot
+    # as many rows as many years, cols are overall energy used in each sector
+    df_plot = pd.DataFrame(columns=['year','Industry','Other','Transport'], index = range(0,31,1)) #index size = number of years considered
+
+    df = pd.read_csv('progetto/datasets/how_energy_is_used/'+country+'_how_energy_is_used.csv')
+    df = df[df.Use != 'energy use'] #remove a not significative row
+    
+    #create and fill the Type column (track the sector of each row)
+    df['Type']=''
+        
+    type_list=[]
+    for i in range (len(df)):
+        if (df.iloc[i]['Use'].startswith('industry')):
+            type_list.append('Industry')
+        elif (df.iloc[i]['Use'].startswith('transport')):
+            type_list.append('Transport')
+        elif (df.iloc[i]['Use'].startswith('other')):
+            type_list.append('Other') 
+
+    df['Type']=type_list
+            
+    df=df.replace(",","", regex=True) #make all values suitable to be cast from string to float
+
+    k=0 #iterator of df_plot
+
+    #for each year, compute the mean consumption of each sector
+    for y in range(1990,2021,1):
+        year=str(y)
+        df[year] = pd.to_numeric(df[year], downcast="float") #cast values      
+            
+        
+        Industry_mean= float( round(df[df.Type == 'Industry'][year].sum(),2) )  
+        Other_mean = float( round(df[df.Type == 'Other'][year].sum(),2) )
+        Transport_mean = float( round(df[df.Type == 'Transport'][year].sum(),2) )
+
+        #fill df_plot by putting for each row: the year, the mean consumption of each sector
+        df_plot.iloc[k]['year']=year
+        df_plot.iloc[k]['Industry']=Industry_mean
+        df_plot.iloc[k]['Other']=Other_mean
+        df_plot.iloc[k]['Transport']=Transport_mean
+        k+=1
+
+    fig_area = fig_area = px.area(df_plot, x="year", y=['Industry','Other','Transport'], title='Comparison', color_discrete_sequence=px.colors.qualitative.Dark2, color_discrete_map={ # replaces default color mapping by value
+                    "Industry": 'Orange', "Other": '#2E91E5', 'Transport':'green'},labels={"variable": "Sector"}   ) 
+    graphJSON_area = json.dumps(fig_area, cls=plotly.utils.PlotlyJSONEncoder)
+
+    return render_template('show_data/topic4.html', country=country, graphJSON_area=graphJSON_area )
 
 
 
-def produce_table_for_topic4(df_countries,year):
+
+#old prod for 4
+def produce_table_for_topic5(df_countries,year):
     #input: year chosen & df empty whose col are = ['Name','Renewable percentage']
     #output: table containing, as many rows as many countries in EU, col = % of renewable energy converted in electricity in the year considered
 
@@ -257,15 +323,16 @@ def produce_table_for_topic4(df_countries,year):
 
     return df_countries
 
-@bp.route('/<string:country>/<string:topic>/<string:year>/topic4')
-def topic4(country, topic, year):
+#old 4
+@bp.route('/<string:country>/<string:topic>/<string:year>/topic5')
+def topic5(country, topic, year):
     #IS THE VIEW OF THE GRAPH SHOWING, GIVEN A YEAR, THE % OF RENEWABLE SOURCES OF ENERGY CONVERTED BY ALL EUROPEAN COUNTRIES  
     #input: country and topic are not used (but needed due to simplicity), year is the year chosen by user
     #output: choropleth in json format (passed to html)
 
     df_countries = pd.DataFrame(columns=['Name','Renewable percentage'])
 
-    df_for_choropleth= produce_table_for_topic4(df_countries,year)
+    df_for_choropleth= produce_table_for_topic5(df_countries,year)
 
     #here is used a json file defining the european structure, used for build the map,
     #each country in the json file is associated with a set of metadata,
@@ -294,10 +361,10 @@ def topic4(country, topic, year):
 
     graphJSON_choropleth = json.dumps(fig_choropleth, cls=plotly.utils.PlotlyJSONEncoder)
 
-    return render_template('show_data/topic4.html', year=year, graphJSON_choropleth=graphJSON_choropleth )
+    return render_template('show_data/topic5.html', year=year, graphJSON_choropleth=graphJSON_choropleth )
 
-
-def produce_table_for_topic5(df_countries, year):
+#old prod for 5
+def produce_table_for_topic6(df_countries, year):
      #input: year chosen & df empty whose col are = ['Name','Renewable percentage']
     #output: table containing, as many rows as many countries in EU, col = % of renewable energy converted in electricity in the year considered
 
@@ -329,7 +396,7 @@ def produce_table_for_topic5(df_countries, year):
     df_countries['Name']=name_list_json
 
     for i in (name_list_csv):
-        df = pd.read_csv('progetto/datasets//how_energy_is_used/'+i+'_how_energy_is_used.csv')
+        df = pd.read_csv('progetto/datasets/how_energy_is_used/'+i+'_how_energy_is_used.csv')
         df = df[['Use',year]]
         df=df.replace(",","", regex=True)
         
@@ -346,16 +413,16 @@ def produce_table_for_topic5(df_countries, year):
     df_countries['Total Consumption']=value_list
     return df_countries
 
-
-@bp.route('/<string:country>/<string:topic>/<string:year>/topic5')
-def topic5(country, topic, year):
-    #IS THE VIEW OF THE GRAPH SHOWING, GIVEN A YEAR, THE % OF RENEWABLE SOURCES OF ENERGY CONVERTED BY ALL EUROPEAN COUNTRIES  
+#old5
+@bp.route('/<string:country>/<string:topic>/<string:year>/topic6')
+def topic6(country, topic, year):
+    #IS THE VIEW OF THE GRAPH SHOWING, GIVEN A YEAR, THE OVERALL ENERGY CONSUMED BY ALL EUROPEAN COUNTRIES  
     #input: country and topic are not used (but needed due to simplicity), year is the year chosen by user
     #output: choropleth in json format (passed to html)
 
     df_countries = pd.DataFrame(columns=['Name','Renewable percentage'])
 
-    df_for_choropleth= produce_table_for_topic5(df_countries,year)
+    df_for_choropleth= produce_table_for_topic6(df_countries,year)
 
     #here is used a json file defining the european structure, used for build the map,
     #each country in the json file is associated with a set of metadata,
@@ -384,9 +451,7 @@ def topic5(country, topic, year):
 
     graphJSON_choropleth = json.dumps(fig_choropleth, cls=plotly.utils.PlotlyJSONEncoder)
 
-    return render_template('show_data/topic5.html', year=year, graphJSON_choropleth=graphJSON_choropleth )
-
-
+    return render_template('show_data/topic6.html', year=year, graphJSON_choropleth=graphJSON_choropleth )
 
 
 
