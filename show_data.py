@@ -45,7 +45,7 @@ def standard_year_selection(country, topic):
 
 
 
-#old1
+
 @bp.route('/<string:country>/<string:topic>/<string:year>/topic1')
 def topic1(country, topic, year):
     #IS THE VIEW OF THE GRAPH SHOWING, GIVEN A COUNTRY AND YEAR, HOW IS PRODUCED ELECTRICITY
@@ -84,7 +84,6 @@ def topic1(country, topic, year):
 
 
 
-#old prod for 3
 def produce_table_for_topic2(df):
     #input: table containing, for a country, as many rows as many source of energy converted in electricity & as many col as many year considered (1990-2020)
     #       each value is the amount of that source converted in that year
@@ -126,7 +125,7 @@ def produce_table_for_topic2(df):
     return df2
 
 
-#old3
+
 @bp.route('/<string:country>/topic2')
 def topic2(country):
     #IS THE VIEW OF THE GRAPH SHOWING, GIVEN A COUNTRY, THE TREND OVER YEARS OF % OF RENWABLE ENERGY 
@@ -152,7 +151,7 @@ def topic2(country):
     return render_template('show_data/topic2.html', country=country, graphJSON_area=graphJSON_area)
 
 
-#old2
+
 @bp.route('/<string:country>/<string:topic>/<string:year>/topic3')
 def topic3(country, topic, year):
     #IS THE VIEW OF A GRAPH SHOWING, GIVEN A COUNTRY AND YEAR, HOW ENERGY IS USED (IN WHICH SECTORS)   
@@ -204,7 +203,7 @@ def topic3(country, topic, year):
         return render_template('show_data/ErrorPage.html')
 
 
-#old6
+
 @bp.route('/<string:country>/topic4')
 def topic4(country):
     #IS THE VIEW OF THE GRAPH SHOWING, GIVEN A COUNTRY, THE TREND OVER YEARS OF HOW ENERGY IS USED, DIVIDED INTO SECTORS
@@ -242,15 +241,15 @@ def topic4(country):
         df[year] = pd.to_numeric(df[year], downcast="float") #cast values      
             
         
-        Industry_mean= float( round(df[df.Type == 'Industry'][year].sum(),2) )  
-        Other_mean = float( round(df[df.Type == 'Other'][year].sum(),2) )
-        Transport_mean = float( round(df[df.Type == 'Transport'][year].sum(),2) )
+        Industry_sum= float( round(df[df.Type == 'Industry'][year].sum(),2) )  
+        Other_sum = float( round(df[df.Type == 'Other'][year].sum(),2) )
+        Transport_sum = float( round(df[df.Type == 'Transport'][year].sum(),2) )
 
         #fill df_plot by putting for each row: the year, the mean consumption of each sector
         df_plot.iloc[k]['year']=year
-        df_plot.iloc[k]['Industry']=Industry_mean
-        df_plot.iloc[k]['Other']=Other_mean
-        df_plot.iloc[k]['Transport']=Transport_mean
+        df_plot.iloc[k]['Industry']=Industry_sum
+        df_plot.iloc[k]['Other']=Other_sum
+        df_plot.iloc[k]['Transport']=Transport_sum
         k+=1
 
     fig_area = fig_area = px.area(df_plot, x="year", y=['Industry','Other','Transport'], title='Comparison', color_discrete_sequence=px.colors.qualitative.Dark2, color_discrete_map={ # replaces default color mapping by value
@@ -262,7 +261,7 @@ def topic4(country):
 
 
 
-#old prod for 4
+
 def produce_table_for_topic5(df_countries,year):
     #input: year chosen & df empty whose col are = ['Name','Renewable percentage']
     #output: table containing, as many rows as many countries in EU, col = % of renewable energy converted in electricity in the year considered
@@ -323,7 +322,7 @@ def produce_table_for_topic5(df_countries,year):
 
     return df_countries
 
-#old 4
+
 @bp.route('/<string:country>/<string:topic>/<string:year>/topic5')
 def topic5(country, topic, year):
     #IS THE VIEW OF THE GRAPH SHOWING, GIVEN A YEAR, THE % OF RENEWABLE SOURCES OF ENERGY CONVERTED BY ALL EUROPEAN COUNTRIES  
@@ -350,11 +349,10 @@ def topic5(country, topic, year):
 
     #locations & color, refer to the attribute in the dataframe from which take values
     #featureidkey="Name" is used to match the name of the country in the dataframe with the name of the country in the json(they've same attribute name)
-    fig_choropleth = px.choropleth(df_countries, geojson=data_json, locations='Name', color='Renewable percentage',
+    fig_choropleth = px.choropleth(df_for_choropleth, geojson=data_json, locations='Name', color='Renewable percentage',
                            color_continuous_scale="speed",
                            range_color=(0, 1),
                            scope="europe",
-                           labels={'unemp':'unemployment rate'},
                            featureidkey="Name"
                           )
     fig_choropleth.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
@@ -363,7 +361,7 @@ def topic5(country, topic, year):
 
     return render_template('show_data/topic5.html', year=year, graphJSON_choropleth=graphJSON_choropleth )
 
-#old prod for 5
+
 def produce_table_for_topic6(df_countries, year):
      #input: year chosen & df empty whose col are = ['Name','Renewable percentage']
     #output: table containing, as many rows as many countries in EU, col = % of renewable energy converted in electricity in the year considered
@@ -401,7 +399,7 @@ def produce_table_for_topic6(df_countries, year):
         df=df.replace(",","", regex=True)
         
         df[year] = pd.to_numeric(df[year], downcast="float")
-        df = df[df.Use != 'Total']
+        df = df[df.Use != 'energy use']
         
         tot=0    
         
@@ -413,7 +411,7 @@ def produce_table_for_topic6(df_countries, year):
     df_countries['Total Consumption']=value_list
     return df_countries
 
-#old5
+
 @bp.route('/<string:country>/<string:topic>/<string:year>/topic6')
 def topic6(country, topic, year):
     #IS THE VIEW OF THE GRAPH SHOWING, GIVEN A YEAR, THE OVERALL ENERGY CONSUMED BY ALL EUROPEAN COUNTRIES  
@@ -441,7 +439,7 @@ def topic6(country, topic, year):
     #locations & color, refer to the attribute in the dataframe from which take values
     #featureidkey="Name" is used to match the name of the country in the dataframe with the name of the country in the json(they've same attribute name)
     fig_choropleth = px.choropleth(df_for_choropleth, geojson=data_json, locations='Name', color='Total Consumption',
-                           color_continuous_scale="Viridis",
+                           color_continuous_scale="matter",
                            range_color=(0, 100000),
                            scope="europe",
                            labels={'Total Consumption':'Total Consumption'},
