@@ -51,27 +51,45 @@
 
 <div class="w3-padding-large" id="main">
   <!-- Header/Home -->
-    <h1 class="w3-jumbo w3-text-red">  How electricity is produced in Europe in the year {{ year }}</h1>
+    <h1 class=" w3-text-red">  How electricity is produced in Europe in the year {{ year }}</h1>
     <p>
       The following graph shows, for each country, the percentage of electricity produced from renewable sources of energy. The "-1" value stands for "non available" data.
     </p>
     <hr style="width:10vw;border:0.5vw  solid red" class="w3-round">
 
 
-<!-- Services -->
-<div class="w3-container" id="services" style="margin-top:75px">
-  {% block content %}
-<div id="plotly-funnel"  class="chart"></div>
-<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-<script>
-var graph_tree = {{ graphJSON_choropleth | safe }};
-Plotly.plot('plotly-funnel', graph_tree, {});
-</script>
+    <div class="w3-center">
+      <ul class="w3-ul w3-light-grey w3-center">
+        <li class="w3-red w3-xlarge">{{country}}, {{year}}</li>
+      </ul>
+    </div>
 
 
-{% endblock %}
-</div>
-</div>
+  
+    <div class="w3-container" id="services" style="display: flex; height: 100%; width: 100%;">
+      {% block content %}
+      <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    
+    <div id="plotly-funnel-5"  class="chart" style="width: 50%;">
+      <script>
+      var graph_tree_5 = {{ graphJSON_choropleth_5 | safe }};
+      Plotly.plot('plotly-funnel-5', graph_tree_5, {});
+      </script>
+      </div>
+    
+      <div id="plotly-funnel-6"  class="chart" style="width: 50%; ">
+      <script>
+      var graph_tree_6 = {{ graphJSON_choropleth_6 | safe }};
+      Plotly.plot('plotly-funnel-6', graph_tree_6, {});
+      </script>
+      </div>
+    
+    
+    
+    {% endblock %}
+    </div>
+    </div>
+
 
 <!-- FINE Page Content VARIABILE -->
 
