@@ -49,61 +49,36 @@
       <!-- Inizio Content VARIABILE -->
       <div class="w3-padding-large" id="main">
         <!-- Header/Home -->
-        <h1 class="w3-jumbo w3-text-red">  European Electricity Dashboard</h1>
-        <p>Select a country to explore or a topic </p>
+        <h1 class=" w3-text-red">  European Electricity Dashboard</h1>
+        <h3>Select a country to explore its statistics or select the European Overall View</h3>
         <hr style="width:10vw;border:0.5vw  solid red" class="w3-round">
 
         
         <div class="w3-row-padding">
           <div class="w3-half w3-margin-bottom">
             <ul class="w3-ul w3-light-grey w3-center">
-              <li class="w3-dark-grey w3-xlarge w3-padding-32">Country List</li>
-              <li class="w3-padding"> <a href="{{ url_for('show_data.standard_topic_selection', country='Albania') }}"> Albania</a></li>
-              <li class="w3-padding"> <a href="{{ url_for('show_data.standard_topic_selection', country='Austria') }}"> Austria</a></li>
-              <li class="w3-padding"> <a href="{{ url_for('show_data.standard_topic_selection', country='Belgium') }}"> Belgium</a></li>
-              <li class="w3-padding"> <a href="{{ url_for('show_data.standard_topic_selection', country='Bosnia_and_Herzegovina') }}"> Bosnia & Herzegovina</a></li>
-              <li class="w3-padding"> <a href="{{ url_for('show_data.standard_topic_selection', country='Bulgaria') }}"> Bulgaria</a></li>
-              <li class="w3-padding"> <a href="{{ url_for('show_data.standard_topic_selection', country='Croatia') }}"> Croatia</a></li>
-              <li class="w3-padding"> <a href="{{ url_for('show_data.standard_topic_selection', country='Cyprus') }}"> Cyprus</a></li>
-              <li class="w3-padding"> <a href="{{ url_for('show_data.standard_topic_selection', country='Czech_Rep') }}"> Czech Rep</a></li>
-              <li class="w3-padding"> <a href="{{ url_for('show_data.standard_topic_selection', country='Denmark') }}"> Denmark</a></li>
-              <li class="w3-padding"> <a href="{{ url_for('show_data.standard_topic_selection', country='Estonia') }}"> Estonia</a></li>
-              <li class="w3-padding"> <a href="{{ url_for('show_data.standard_topic_selection', country='Finland') }}"> Finland</a></li>
-              <li class="w3-padding"> <a href="{{ url_for('show_data.standard_topic_selection', country='France') }}"> France</a></li>
-              <li class="w3-padding"> <a href="{{ url_for('show_data.standard_topic_selection', country='Georgia') }}"> Georgia</a></li>
-              <li class="w3-padding"> <a href="{{ url_for('show_data.standard_topic_selection', country='Germany') }}"> Germany</a></li>
-              <li class="w3-padding"> <a href="{{ url_for('show_data.standard_topic_selection', country='Greece') }}"> Greece</a></li>
-              <li class="w3-padding"> <a href="{{ url_for('show_data.standard_topic_selection', country='Hungary') }}"> Hungary</a></li>
-              <li class="w3-padding"> <a href="{{ url_for('show_data.standard_topic_selection', country='Iceland') }}"> Iceland</a></li>
-              <li class="w3-padding"> <a href="{{ url_for('show_data.standard_topic_selection', country='Ireland') }}"> Ireland</a></li>
-              <li class="w3-padding"> <a href="{{ url_for('show_data.standard_topic_selection', country='Italy') }}"> Italy</a></li>
-              <li class="w3-padding"> <a href="{{ url_for('show_data.standard_topic_selection', country='Latvia') }}"> Latvia</a></li>
-              <li class="w3-padding"> <a href="{{ url_for('show_data.standard_topic_selection', country='Lithuania') }}"> Lithuania</a></li>
-              <li class="w3-padding"> <a href="{{ url_for('show_data.standard_topic_selection', country='Luxembourg') }}"> Luxembourg</a></li>
-              <li class="w3-padding"> <a href="{{ url_for('show_data.standard_topic_selection', country='Malta') }}"> Malta</a></li>
-              <li class="w3-padding"> <a href="{{ url_for('show_data.standard_topic_selection', country='Montenegro') }}"> Montenegro</a></li>
-              <li class="w3-padding"> <a href="{{ url_for('show_data.standard_topic_selection', country='Netherlands') }}"> Netherlands</a></li>
-              <li class="w3-padding"> <a href="{{ url_for('show_data.standard_topic_selection', country='Macedonia') }}"> Macedonia</a></li>
-              <li class="w3-padding"> <a href="{{ url_for('show_data.standard_topic_selection', country='Norway') }}"> Norway</a></li>
-              <li class="w3-padding"> <a href="{{ url_for('show_data.standard_topic_selection', country='Poland') }}"> Poland</a></li>
-              <li class="w3-padding"> <a href="{{ url_for('show_data.standard_topic_selection', country='Portugal') }}"> Portugal</a></li>
-              <li class="w3-padding"> <a href="{{ url_for('show_data.standard_topic_selection', country='Romania') }}"> Romania</a></li>
-              <li class="w3-padding"> <a href="{{ url_for('show_data.standard_topic_selection', country='Serbia') }}"> Serbia</a></li>
-              <li class="w3-padding"> <a href="{{ url_for('show_data.standard_topic_selection', country='Slovakia') }}"> Slovakia</a></li>
-              <li class="w3-padding"> <a href="{{ url_for('show_data.standard_topic_selection', country='Slovenia') }}"> Slovenia</a></li>
-              <li class="w3-padding"> <a href="{{ url_for('show_data.standard_topic_selection', country='Spain') }}"> Spain</a></li>
-              <li class="w3-padding"> <a href="{{ url_for('show_data.standard_topic_selection', country='Sweden') }}"> Sweden</a></li>
-              <li class="w3-padding"> <a href="{{ url_for('show_data.standard_topic_selection', country='Turkey') }}"> Turkey</a></li>
-              <li class="w3-padding"> <a href="{{ url_for('show_data.standard_topic_selection', country='Ukraine') }}"> Ukraine</a></li>
-              <li class="w3-padding"> <a href="{{ url_for('show_data.standard_topic_selection', country='United_Kingdom') }}"> United Kingdom</a></li>
+              <li class="w3-dark-grey w3-xlarge w3-padding-32">Select a single country</li>
+              {% set country_list = 
+                ['Albania', 'Austria', 'Belgium', 'Bosnia_and_Herzegovina', 'Bulgaria', 'Croatia', 'Cyprus', 'Czech_Rep', 'Denmark', 'Estonia',
+                'Finland', 'France', 'Georgia', 'Germany', 'Greece', 'Hungary', 'Iceland', 'Ireland', 'Italy', 'Latvia', 'Lithuania', 'Luxembourg',
+                'Malta', 'Montenegro', 'Netherlands', 'Montenegro', 'Macedonia', 'Norway', 'Poland', 'Portugal',
+                'Romania', 'Serbia', 'Slovakia', 'Slovenia', 'Spain', 'Sweden', 'Turkey', 'Ukraine', 'United_Kingdom']
+              %}
+              <form method="post">
+                <select name="country" method="POST" >
+                  {% for country in country_list %}
+                  <option value= "{{country}}" SELECTED>{{country}}</option>"
+                  {% endfor %}
+                </select>
+                <input type="submit" value="Explore">
             </ul>
+            </form>
           </div>
               
           <div class="w3-half">
               <ul class="w3-ul w3-light-grey w3-center">
                 <li class="w3-red w3-xlarge w3-padding-32">European overall view</li>
                 <li class="w3-padding"> <a href="{{ url_for('show_data.standard_year_selection', country= 'European Countries' , topic = '5') }}"> Renewable vs non-Renewable, how energy is produced</a></li>
-                <li class="w3-padding"> <a href="{{ url_for('show_data.standard_year_selection', country= 'European Countries' , topic = '6') }}"> How much energy is used </a></li>
               </ul>
           </div>
       
