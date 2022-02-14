@@ -48,35 +48,47 @@
   
   <!-- INIZIO Page Content VARIABILE -->
 
-
 <div class="w3-padding-large" id="main">
   <!-- Header/Home -->
-    <h1 class=" w3-text-red">  How electricity is used in {{ country }} during {{ year }}</h1>
-    <p>The following are the different sectors in which is used the electricity</p>
+    <p>The following are the different sectors in which is used the electricity </p>
     <hr style="width:10vw;border:0.5vw  solid red" class="w3-round">
 
 
-  <!-- Services -->
-  <div class="w3-container" id="services" style="margin-top:75px">
-    {% block content %}
-  <div id="plotly-tree"  class="chart"></div>
+<!-- Services -->
+<div class="w3-center">
+  <ul class="w3-ul w3-light-grey w3-center">
+    <li class="w3-red w3-xlarge">  How electricity is used in {{ country }} in {{ year }}</li>
+  </ul>
+</div>
+
+<div class="w3-container" id="services" style="display: flex; height: 100%; width: 100%;">
+  {% block content %}
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+<div id="plotly-funnel"  class="chart" style="width: 80%;">
   <script>
   var graph_tree = {{ graphJSON_tree | safe }};
-  Plotly.plot('plotly-tree', graph_tree, {});
+  Plotly.plot('plotly-funnel', graph_tree, {});
   </script>
+  </div>
 
-<div id="plotly-pie"  class="chart"></div>
+  <div id="plotly-pie"  class="chart" style="width: 20%; ">
   <script>
   var graph_pie = {{ graphJSON_pie | safe }};
   Plotly.plot('plotly-pie', graph_pie, {});
   </script>
+  </div>
+
+
 
 {% endblock %}
-  </div>
 </div>
 
-<!-- FINE Page Content VARIABILE -->
+
+
+
+
+
 
 
 
