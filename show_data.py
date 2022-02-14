@@ -7,6 +7,7 @@ import json
 import plotly
 import plotly.express as px
 import plotly.graph_objs as go
+from plotly.subplots import make_subplots
 import numpy as np
 
 #bp is a container of views, each of the following bp.route are
@@ -138,14 +139,16 @@ def produce_table_for_topic2(df):
 
             #assign the computed values to the k-th row of the new df2
 
-            df2.iloc[k]['perc_r']=round(tot_r/tot,2)
-            df2.iloc[k]['perc_n']=round(tot_n/tot,2)
-            df2.iloc[k]['tot']=tot
-            df2.iloc[k]['year']=df.columns[i]
-            df2.iloc[k]['Renewable']=tot_r
-            df2.iloc[k]['Non Renewable']=tot_n
-            #update variables and iterators
-            k=k+1
+            if(tot>0):
+
+                df2.iloc[k]['perc_r']=round(tot_r/tot,2)
+                df2.iloc[k]['perc_n']=round(tot_n/tot,2)
+                df2.iloc[k]['tot']=int(round(tot,2))
+                df2.iloc[k]['year']=df.columns[i]
+                df2.iloc[k]['Renewable']=int(round(tot_r,2))
+                df2.iloc[k]['Non Renewable']=int(round(tot_n,2))
+                #update variables and iterators
+                k=k+1
             tot=0
             tot_r=0
             tot_n=0
@@ -178,6 +181,8 @@ def topic2(country):
         y=df_for_area["Renewable"],
         x=df_for_area.year,
         name="Renewable",
+        text=df_for_area['perc_r'],
+        textposition='inside',
         marker=dict(
             color='rgba(131,245,44, 0.6)',
             line=dict(color='rgba(131,245,44, 0.5)', width=0.05)
@@ -188,6 +193,8 @@ def topic2(country):
         y=df_for_area["Non Renewable"],
         x=df_for_area.year,
         name="Non Renewable",
+        text=df_for_area['perc_n'],
+        textposition='inside',
         marker=dict(
             color='rgba(255,117,20, 0.6)',
             line=dict(color='rgba(255,117,20, 0.5)', width=0.05)
@@ -195,15 +202,10 @@ def topic2(country):
     ))
 
     fig_for_area.update_layout(
-        autosize=True,
+        margin_autoexpand=True,
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
-        title={
-            'text': "Comparison",
-            'y':0.96,
-            'x':0.5,
-            'xanchor': 'center',
-            'yanchor': 'top'},
+        title=country,
         barmode='stack')
 
 
@@ -252,9 +254,11 @@ def topic3(country, topic, year):
 
         fig_tree = px.treemap(df, path=['Type','Use'], values = 'Amount', color='Type', color_discrete_sequence=px.colors.qualitative.Dark2, color_discrete_map={ # replaces default color mapping by value
                     "Industry": 'Orange', "Other": '#2E91E5', 'Transport':'green'})
+        fig_tree.update_layout( margin_l=0) 
 
-        fig_pie = px.pie(df, values='Amount', names='Type', title='Sectors comparison', color='Type', color_discrete_sequence=px.colors.qualitative.Dark2, color_discrete_map={ # replaces default color mapping by value
+        fig_pie = px.pie(df, values='Amount', names='Type', color='Type', color_discrete_sequence=px.colors.qualitative.Dark2, color_discrete_map={ # replaces default color mapping by value
                     "Industry": 'Orange', "Other": '#2E91E5', 'Transport':'green'} )
+        fig_pie.update_layout(showlegend=False, margin_b=0, margin_t=0,margin_l=0,margin_r=0) 
 
 
         graphJSON_tree = json.dumps(fig_tree, cls=plotly.utils.PlotlyJSONEncoder)
@@ -315,11 +319,59 @@ def topic4(country):
         df_plot.iloc[k]['Transport']=Transport_mean
         k+=1
 
-    fig_area = fig_area = px.area(df_plot, x="year", y=['Industry','Other','Transport'], title='Comparison', color_discrete_sequence=px.colors.qualitative.Dark2, color_discrete_map={ # replaces default color mapping by value
-                    "Industry": 'Orange', "Other": '#2E91E5', 'Transport':'green'},labels={"variable": "Sector"}   )
-    graphJSON_area = json.dumps(fig_area, cls=plotly.utils.PlotlyJSONEncoder)
 
-    return render_template('show_data/topic4.html', country=country, graphJSON_area=graphJSON_area )
+    fig_area = fig_area = px.area(df_plot, x="year", y=['Industry','Other','Transport'], color_discrete_sequence=px.colors.qualitative.Dark2, color_discrete_map={ # replaces default color mapping by value
+                    "Industry": 'Orange', "Other": '#2E91E5', 'Transport':'green'},labels={"variable": "Sector: "}   )
+    fig_area.update_layout(showlegend=True, margin_l=0, 
+    legend=dict(
+        orientation="h",
+        yanchor="bottom",
+        y=1,
+        xanchor="right",
+        x=1
+    ))
+
+    fig_subplots = make_subplots(rows=3, cols=1)
+
+    fig_subplots.append_trace(go.Scatter(
+        x=df_plot["year"],
+        y=df_plot['Industry'],
+        name='Industry',
+        fill='tozeroy',
+        marker=dict(
+                color='Orange',
+                line=dict(color='Orange', width=0.05)
+            ),
+    ), row=1, col=1)
+
+    fig_subplots.append_trace(go.Scatter(
+        x=df_plot["year"],
+        y=df_plot['Other'],
+        fill='tozeroy',
+        name='Other',
+        marker=dict(
+                color='#2E91E5',
+                line=dict(color='#2E91E5', width=0.05)
+            ),
+    ), row=2, col=1)
+
+    fig_subplots.append_trace(go.Scatter(
+        x=df_plot["year"],
+        y=df_plot['Transport'],
+        fill='tozeroy',
+        name='Transport',
+        marker=dict(
+                color='green',
+                line=dict(color='green', width=0.05)
+            ),
+    ), row=3, col=1)
+
+    fig_subplots.update_layout(showlegend=False, margin_b=0, margin_t=0,margin_l=0,margin_r=0 )
+
+    graphJSON_area = json.dumps(fig_area, cls=plotly.utils.PlotlyJSONEncoder)
+    graphJSON_subplots = json.dumps(fig_subplots, cls=plotly.utils.PlotlyJSONEncoder)
+
+    return render_template('show_data/topic4.html', country=country, graphJSON_area=graphJSON_area, graphJSON_subplots=graphJSON_subplots )
 
 
 
