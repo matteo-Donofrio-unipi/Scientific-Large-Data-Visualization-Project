@@ -9,15 +9,17 @@ The site is actually hosted on the PythonAnywhere.com web service hosting.
 The Following are the instructions for running the site locally or on the PythonAnywhere.com platform.
 
 
-----SETUP & INIT------
+SETUP & INIT
+-----------------------
 $ mkdir myproject
 $ cd myproject
 $ python3 -m venv venv
 $ pip install flask
+
+
+
+EXECUTE ON LINUX
 -----------------------
-
-
------EXECUTE ON LINUX----------
 
 given a folder path like:
 
@@ -31,11 +33,11 @@ myproject$ export FLASK_APP=app_folder (associate the app_folder to the executab
 myproject$ export FLASK_ENV=development (set the environment as dev => each modification of the code will invoke a restart of the runnable)
 myproject$ flask run (activate the local server on the link http://127.0.0.1:5000/ )
 
----------------------------------
 
 
 
---------EXECUTE ON PYTHONANYWHERE-------
+EXECUTE ON PYTHONANYWHERE
+----------------------------
 https://www.youtube.com/watch?v=75-oCKUx3oU&ab_channel=ArditSulce%27sPythonHow
 
 NB:
@@ -43,12 +45,13 @@ NB:
 
 - init.py is the file containing the initialization phase & index page where the whole site "starts" 
 
-------------------------------------------
 
 
 
 
---------USEFUL LINKS---------------------------------
+
+USEFUL LINKS
+---------------------------
 how to run plotly graphs on html page (graphs rendering)
 https://towardsdatascience.com/web-visualization-with-plotly-and-flask-3660abf9c946
 
@@ -57,5 +60,5 @@ https://towardsdatascience.com/web-visualization-with-plotly-and-flask-3660abf9c
 how to define and plot a cloropleth (geo map)
 https://www.youtube.com/watch?v=aJmaw3QKMvk&ab_channel=IndianPythonista
 
--------------------------------------------------------
+
 
