@@ -7,19 +7,23 @@ $ pip install flask
 ...
 ...
 path is :
-mainFolder/
-	progetto/project folders  (cartella progetto contiene il codice)
+progettoSlv/
+	progetto/project folders & files (cartella progetto contiene il codice)
 	venv/configuration files  (cartella venv contiene file config)
 ...
 ...
 
-mainFolder$ source venv/bin/activate (attiva ambiente virtuale)
-mainFolder$ export FLASK_APP=nome cartella progetto (associa la cartella con codice all'eseguibile)
-mainFolder$ export FLASK_ENV=development (setta la modalità dev che aggiorna l'eseguibile dopo ogni modifica)
-mainFolder$ flask run (attiva il local server sull'indirizzo locale http://127.0.0.1:5000/ )
+progettoSlv$ source venv/bin/activate (attiva ambiente virtuale)
+progettoSlv$ export FLASK_APP=nome cartella progetto (associa la cartella con codice all'eseguibile, in questo caso il nome della cartella è "progetto")
+progettoSlv$ export FLASK_ENV=development (setta la modalità dev che aggiorna l'eseguibile dopo ogni modifica)
+progettoSlv$ flask run (attiva il local server sull'indirizzo locale http://127.0.0.1:5000/ )
 --------RENDERE ESEGUIBILE SU PYTHONANYWHERE-------
 https://www.youtube.com/watch?v=75-oCKUx3oU&ab_channel=ArditSulce%27sPythonHow
 
+NB:
+- in the WSGI-file write -> "from mysite import app as application". Here "mysite" is the name of the Main folder containing the whole application files (py, html, css, ecc...)
+
+- init.py is the file containing the initialization phase & index page where the whole site "starts" 
 
 --------LINK UTILI---------------------------------
 ...come eseguire plotly + JS su html (renderizazzione grafici)
@@ -30,3 +34,5 @@ https://towardsdatascience.com/web-visualization-with-plotly-and-flask-3660abf9c
 ...come definire e plottare mappa geografica su plotly
 https://www.youtube.com/watch?v=aJmaw3QKMvk&ab_channel=IndianPythonista
 ...
+
+-------------------------------------------------------
