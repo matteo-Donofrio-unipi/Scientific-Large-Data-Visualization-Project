@@ -45,19 +45,34 @@
 
       <!-- BASE COMUNE PAGINE/ PARTE 1 FINE -->
 
-      <!-- INIZIO Page Content VARIABILE -->
+  
+  <!-- INIZIO Page Content VARIABILE -->
+<!-- Services -->
 
-      <div class="w3-padding-large" id="main">
-        <!-- Header/Home -->
-          <h1 class="w3-text-red">  European Electricity Dashboard</h1>
-          <hr style="width:10vw;border:0.5vw  solid red" class="w3-round">
-            <h1>
-                We're sorry, but there is no available data for the chosen setting
-            </h1>
 
-      </div>
+<div class="w3-padding-large" id="main">
+  <!-- Header/Home -->
+    <h1 class=" w3-text-red"> How much energy is used in Europe during {{ year }}</h1>
+    <p>The following graph shows, for each country, the amount of electricity consumed. The "-1" value stands for "non available" data. </p>
+    <hr style="width:10vw;border:0.5vw  solid red" class="w3-round">
 
-      <!-- FINE Page Content VARIABILE -->
+
+<!-- Services -->
+<div class="w3-container" id="services" style="margin-top:75px">
+  {% block content %}
+<div id="plotly-funnel"  class="chart"></div>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script>
+var graph_tree = {{ graphJSON_choropleth | safe }};
+Plotly.plot('plotly-funnel', graph_tree, {});
+</script>
+
+{% endblock %}
+</div>
+</div>
+
+<!-- FINE Page Content VARIABILE -->
+
 
 
 
@@ -73,5 +88,24 @@
 </html>
 
 <!-- BASE COMUNE PAGINE/ PARTE 2 FINE -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
